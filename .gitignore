@@ -9,5 +9,8 @@ data-pipeline/raw/
 .DS_Store
 *.swp
 
+# Build output — regenerate with ./package.sh
+dist/
+
 # Scratch
 *.log

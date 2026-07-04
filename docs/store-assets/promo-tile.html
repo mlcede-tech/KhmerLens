@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<!-- KhmerLens promo tile. Rendered to promo-tile.png at 440x280 by
+     tests/gen-store-assets.js. Also usable as the small marquee source. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --accent: #b45309;
+    --accent-bright: #fbbf24;
+    --ink: #f5f3ef;
+    --muted: #b9b3a7;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 440px; height: 280px; overflow: hidden; }
+  body {
+    position: relative;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background:
+      radial-gradient(120% 140% at 82% 8%, rgba(251,191,36,0.20) 0%, transparent 46%),
+      radial-gradient(90% 120% at 6% 100%, rgba(180,83,9,0.28) 0%, transparent 52%),
+      linear-gradient(150deg, #211f1c 0%, #17161a 100%);
+    color: var(--ink);
+    padding: 30px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .brand { display: flex; align-items: center; gap: 13px; }
+  .mark {
+    width: 52px; height: 52px;
+    display: grid; place-items: center;
+    border-radius: 14px;
+    background: linear-gradient(155deg, #d97706, #b45309);
+    color: #fff;
+    font-family: "Khmer OS", "Noto Sans Khmer", "Khmer Sangam MN", sans-serif;
+    font-size: 30px; line-height: 1;
+    box-shadow: 0 6px 18px rgba(180,83,9,0.5);
+  }
+  .name { font-size: 27px; font-weight: 650; letter-spacing: -0.015em; }
+  .name em { color: var(--accent-bright); font-style: normal; }
+
+  .pitch { font-size: 15.5px; line-height: 1.45; color: var(--muted); max-width: 250px; }
+  .pitch b { color: var(--ink); font-weight: 600; }
+
+  /* floating mini popup, echoing the real lookup card */
+  .card {
+    position: absolute;
+    right: 26px; bottom: 26px;
+    width: 210px;
+    padding: 11px 13px 9px;
+    background: #ffffff;
+    color: #1a1d21;
+    border-radius: 11px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    transform: rotate(-2.5deg);
+    font-size: 12px;
+  }
+  .card .row { display: flex; align-items: baseline; gap: 7px; }
+  .card .kw {
+    font-family: "Khmer OS", "Noto Sans Khmer", "Khmer Sangam MN", sans-serif;
+    font-size: 26px; line-height: 1.5;
+  }
+  .card .chip {
+    font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 999px;
+    background: #fef3c7; color: #92400e;
+  }
+  .card .rom { color: #b45309; font-style: italic; margin: 1px 0 3px; }
+  .card .def { color: #1a1d21; }
+  .card .pos { font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.04em; color: #6b7280; margin-right: 5px; }
+  .offline {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; color: var(--accent-bright);
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-bright);
+    box-shadow: 0 0 8px var(--accent-bright); }
+</style>
+</head>
+<body>
+  <div class="brand">
+    <span class="mark">ខ</span>
+    <span class="name">Khmer<em>Lens</em></span>
+  </div>
+
+  <p class="pitch"><b>Hover any Khmer word</b> for an instant definition, romanization &amp; frequency.</p>
+
+  <span class="offline"><span class="dot"></span>Works fully offline</span>
+
+  <div class="card">
+    <div class="row">
+      <span class="kw">ភ្នំពេញ</span>
+      <span class="chip">common</span>
+    </div>
+    <div class="rom">phnum pɨñ</div>
+    <div class="def"><span class="pos">noun</span>Phnom Penh, capital of Cambodia</div>
+  </div>
+</body>
+</html>
