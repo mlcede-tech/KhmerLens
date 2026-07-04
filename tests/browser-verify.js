@@ -1,7 +1,13 @@
 /**
  * KhmerLens live browser verification.
- * Loads the unpacked extension in headless Chromium via Playwright, opens the
- * saved Khmer test pages, simulates hover, checks the popup, and screenshots.
+ *
+ * Part A — content-script integration: serves the project over HTTP, runs the
+ * real lib + content scripts on the saved Khmer pages (via testkit's chrome
+ * shim), simulates hover, and checks the popup, highlight, shortcuts, ZWSP,
+ * links, scroll containers, and dark mode.
+ *
+ * Part B — extension smoke: loads the actual unpacked extension and confirms
+ * the MV3 service worker boots with the activeTab + scripting permission model.
  *
  * Run: node browser-verify.js
  */
@@ -10,36 +16,19 @@ const path = require('node:path');
 const fs = require('node:fs');
 const os = require('node:os');
 const { chromium } = require('playwright');
+const kit = require('./testkit.js');
 
-const EXT = path.resolve(__dirname, '..', 'extension');
-const PAGES = path.join(__dirname, 'fixtures', 'pages');
+const PAGES = 'tests/fixtures/pages';
 const SHOTS = path.join(__dirname, 'screenshots');
 fs.mkdirSync(SHOTS, { recursive: true });
 
 let failures = 0;
 function check(name, cond, extra) {
-  const mark = cond ? 'PASS' : 'FAIL';
   if (!cond) failures++;
-  console.log(`[${mark}] ${name}${extra ? ' — ' + extra : ''}`);
-}
-
-async function enableOnPage(sw, page) {
-  // simulate the toolbar click for this tab (Playwright cannot click the
-  // real toolbar icon): reuse the background's state + message path
-  await page.bringToFront();
-  await sw.evaluate(async () => {
-    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-    const o = await chrome.storage.session.get({ enabledTabs: {} });
-    o.enabledTabs[String(tab.id)] = true;
-    await chrome.storage.session.set(o);
-    await chrome.tabs.sendMessage(tab.id, {
-      type: 'khmerlens:setEnabled', enabled: true,
-    });
-  });
+  console.log(`[${cond ? 'PASS' : 'FAIL'}] ${name}${extra ? ' — ' + extra : ''}`);
 }
 
 async function hoverKhmer(page, selector, charIndex = 2) {
-  // find the first Khmer text node inside selector and mouse-move onto it
   const pt = await page.evaluate(({ selector, charIndex }) => {
     const rootEl = document.querySelector(selector);
     if (!rootEl) return null;
@@ -50,12 +39,9 @@ async function hoverKhmer(page, selector, charIndex = 2) {
       if (m) {
         const r = new Range();
         const i = node.data.indexOf(m[0]) + charIndex;
-        r.setStart(node, i);
-        r.setEnd(node, i + 1);
+        r.setStart(node, i); r.setEnd(node, i + 1);
         const rect = r.getBoundingClientRect();
-        if (rect.width || rect.height) {
-          return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-        }
+        if (rect.width || rect.height) return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
       }
     }
     return null;
@@ -65,66 +51,52 @@ async function hoverKhmer(page, selector, charIndex = 2) {
   return true;
 }
 
-async function popupState(page) {
+function popupState(page) {
   return page.evaluate(() => {
     const host = document.getElementById('khmerlens-host');
     if (!host || !host.shadowRoot) return { present: false };
     const card = host.shadowRoot.querySelector('.kl-card');
     if (!card) return { present: false };
-    const visible = !card.classList.contains('kl-hidden');
-    const q = (s) => {
-      const el = card.querySelector(s);
-      return el ? el.textContent : null;
-    };
+    const q = (s) => { const el = card.querySelector(s); return el ? el.textContent : null; };
     const rect = card.getBoundingClientRect();
     return {
       present: true,
-      visible,
-      word: q('.kl-word'),
-      roman: q('.kl-roman'),
-      gloss: q('.kl-gloss') || q('.kl-nogloss'),
-      alt: q('.kl-alt'),
+      visible: !card.classList.contains('kl-hidden'),
+      word: q('.kl-word'), roman: q('.kl-roman'),
+      gloss: q('.kl-gloss') || q('.kl-nogloss'), alt: q('.kl-alt'),
       dark: card.classList.contains('kl-dark'),
-      inViewport: rect.left >= 0 && rect.top >= 0 &&
-        rect.right <= innerWidth && rect.bottom <= innerHeight,
+      inViewport: rect.left >= 0 && rect.top >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight,
       highlighted: !!(CSS.highlights && CSS.highlights.get('khmerlens')),
     };
   });
 }
 
-(async () => {
-  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'khmerlens-'));
-  const ctx = await chromium.launchPersistentContext(userDataDir, {
-    headless: true,
-    channel: 'chromium', // full browser in new-headless mode (MV3 SW support)
-    args: [
-      `--disable-extensions-except=${EXT}`,
-      `--load-extension=${EXT}`,
-    ],
-    viewport: { width: 1280, height: 800 },
-  });
+async function newEnabledPage(browser, server, pageUrl, colorScheme) {
+  const page = await browser.newPage();
+  if (colorScheme) await page.emulateMedia({ colorScheme });
+  await kit.primePage(page, server.url);
+  await page.goto(server.url + '/' + pageUrl);
+  await kit.enable(page, server.url);
+  return page;
+}
 
-  let [sw] = ctx.serviceWorkers();
-  if (!sw) sw = await ctx.waitForEvent('serviceworker');
-  check('service worker started', !!sw);
+async function partA() {
+  const server = await kit.startServer();
+  const browser = await chromium.launch({ headless: true, viewport: { width: 1280, height: 800 } });
 
-  // ---------------------------------------------------------- news page
-  const page = await ctx.newPage();
-  await page.goto('file://' + path.join(PAGES, 'news.html'));
-  await enableOnPage(sw, page);
-  await page.waitForTimeout(300);
+  // --- news page (edge cases) ---
+  const page = await newEnabledPage(browser, server, `${PAGES}/news.html`, 'light');
 
   check('hover target found (paragraph)', await hoverKhmer(page, 'p'));
-  await page.waitForTimeout(900); // debounce + first dictionary load
+  await page.waitForTimeout(300);
   let st = await popupState(page);
-  check('popup visible on hover', st.present && st.visible, JSON.stringify(st));
+  check('popup visible on hover', st.present && st.visible, JSON.stringify(st).slice(0, 120));
   check('popup shows Khmer word', !!st.word && /[ក-៿]/.test(st.word), st.word);
-  check('popup shows gloss', !!st.gloss, st.gloss && st.gloss.slice(0, 60));
+  check('popup shows gloss', !!st.gloss, st.gloss && st.gloss.slice(0, 50));
   check('popup inside viewport', st.inViewport);
   check('match highlighted on page', st.highlighted);
   await page.screenshot({ path: path.join(SHOTS, '01-news-hover.png') });
 
-  // cycle alternatives with Shift
   const wordBefore = st.word;
   await page.keyboard.press('Shift');
   await page.waitForTimeout(120);
@@ -132,25 +104,18 @@ async function popupState(page) {
   check('Shift cycles matches (or single match)',
     st.visible && (st.alt === null || st.word !== wordBefore || st.alt.includes('/')),
     `before=${wordBefore} after=${st.word} alt=${st.alt}`);
-  await page.screenshot({ path: path.join(SHOTS, '02-news-cycled.png') });
 
-  // n = next word
   await page.keyboard.press('n');
   await page.waitForTimeout(150);
-  const stNext = await popupState(page);
-  check('n jumps to next word', stNext.visible, stNext.word);
+  check('n jumps to next word', (await popupState(page)).visible);
 
-  // Esc hides
   await page.keyboard.press('Escape');
   await page.waitForTimeout(120);
-  st = await popupState(page);
-  check('Esc hides popup', st.present && !st.visible);
+  check('Esc hides popup', !(await popupState(page)).visible);
 
-  // ---------------------------------------------------- ZWSP paragraph
-  const zwspOk = await page.evaluate(() => {
-    const els = [...document.querySelectorAll('p')];
-    return els.some((p) => p.textContent.includes('​'));
-  });
+  // ZWSP
+  const zwspOk = await page.evaluate(() =>
+    [...document.querySelectorAll('p')].some((p) => p.textContent.includes('​')));
   check('fixture has ZWSP paragraph', zwspOk);
   if (zwspOk) {
     const hovered = await page.evaluate(() => {
@@ -159,9 +124,7 @@ async function popupState(page) {
       while ((node = walker.nextNode())) {
         const i = node.data.indexOf('​');
         if (i > 2 && /[ក-៝]/.test(node.data[i - 1])) {
-          const r = new Range();
-          r.setStart(node, i - 2);
-          r.setEnd(node, i - 1);
+          const r = new Range(); r.setStart(node, i - 2); r.setEnd(node, i - 1);
           const rect = r.getBoundingClientRect();
           return { x: rect.left + 2, y: rect.top + rect.height / 2 };
         }
@@ -170,66 +133,80 @@ async function popupState(page) {
     });
     if (hovered) {
       await page.mouse.move(hovered.x, hovered.y);
-      await page.waitForTimeout(400);
-      st = await popupState(page);
-      check('popup works next to ZWSP', st.visible, st.word);
-    } else {
-      check('popup works next to ZWSP', false, 'no hover point found');
-    }
+      await page.waitForTimeout(300);
+      check('popup works next to ZWSP', (await popupState(page)).visible);
+    } else check('popup works next to ZWSP', false, 'no hover point');
   }
 
-  // ------------------------------------------------------- link hover
   check('hover target found (link)', await hoverKhmer(page, 'a'));
-  await page.waitForTimeout(400);
-  st = await popupState(page);
-  check('popup on link text, no navigation', st.visible && page.url().includes('news.html'));
-  await page.screenshot({ path: path.join(SHOTS, '03-news-link.png') });
+  await page.waitForTimeout(300);
+  check('popup on link text, no navigation',
+    (await popupState(page)).visible && page.url().includes('news.html'));
 
-  // -------------------------------------------------- scrolling container
-  const scrollSel = 'div[style*="overflow"], .scroll-box';
+  const scrollSel = '.scroll-box, div[style*="overflow"]';
   if (await page.$(scrollSel)) {
     await page.$eval(scrollSel, (el) => { el.scrollTop = 20; });
     check('hover target found (scroll container)', await hoverKhmer(page, scrollSel));
-    await page.waitForTimeout(400);
-    st = await popupState(page);
-    check('popup inside scrolling container', st.visible, st.word);
+    await page.waitForTimeout(300);
+    check('popup inside scrolling container', (await popupState(page)).visible);
   }
 
-  // ------------------------------------------------------ wikipedia page
-  const page2 = await ctx.newPage();
-  await page2.goto('file://' + path.join(PAGES, 'wikipedia.html'));
-  await enableOnPage(sw, page2);
-  await page2.waitForTimeout(300);
+  // --- wikipedia page + dark mode ---
+  const page2 = await newEnabledPage(browser, server, `${PAGES}/wikipedia.html`, 'dark');
   check('hover target found (wikipedia)', await hoverKhmer(page2, 'p', 4));
-  await page2.waitForTimeout(700);
+  await page2.waitForTimeout(300);
   st = await popupState(page2);
-  check('popup on wikipedia page', st.visible, `${st.word} | ${st.gloss && st.gloss.slice(0, 50)}`);
+  check('popup on wikipedia page', st.visible, st.word);
   check('romanization shown', st.roman === null || st.roman.length > 0, st.roman);
-  await page2.screenshot({ path: path.join(SHOTS, '04-wikipedia.png') });
-
-  // ------------------------------------------------------------ dark mode
-  await page2.emulateMedia({ colorScheme: 'dark' });
-  await hoverKhmer(page2, 'p', 8);
-  await page2.waitForTimeout(400);
-  st = await popupState(page2);
   check('dark mode applied (auto theme)', st.visible && st.dark);
-  await page2.screenshot({ path: path.join(SHOTS, '05-wikipedia-dark.png') });
+  await page2.screenshot({ path: path.join(SHOTS, '04-wikipedia-dark.png') });
 
-  // ------------------------------------------------------ disabled state
-  await page2.bringToFront();
-  await sw.evaluate(async () => {
-    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-    await chrome.tabs.sendMessage(tab.id, {
-      type: 'khmerlens:setEnabled', enabled: false,
-    });
+  // --- disabled state ---
+  await page2.evaluate(() => window.KhmerLensTest.setEnabled(false));
+  await hoverKhmer(page2, 'p', 8);
+  await page2.waitForTimeout(300);
+  check('disabled: popup stays hidden', !(await popupState(page2)).visible);
+
+  await browser.close();
+  await server.close();
+}
+
+async function partB() {
+  const EXT = path.resolve(__dirname, '..', 'extension');
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'khmerlens-smoke-'));
+  const ctx = await chromium.launchPersistentContext(userDataDir, {
+    headless: true,
+    channel: 'chromium',
+    args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`],
   });
-  await page2.waitForTimeout(150);
-  await hoverKhmer(page2, 'p', 2);
-  await page2.waitForTimeout(400);
-  st = await popupState(page2);
-  check('disabled: popup stays hidden', !st.present || !st.visible);
+  let [sw] = ctx.serviceWorkers();
+  if (!sw) sw = await ctx.waitForEvent('serviceworker');
+  check('extension service worker boots', !!sw);
+
+  const perms = await sw.evaluate(() => ({
+    scripting: typeof chrome.scripting !== 'undefined',
+    action: typeof chrome.action !== 'undefined',
+    // manifest reflects the minimal permission model
+    manifest: chrome.runtime.getManifest(),
+  }));
+  check('chrome.scripting available (activeTab injection)', perms.scripting);
+  check('chrome.action available (toolbar toggle)', perms.action);
+  check('manifest has NO broad host_permissions',
+    !perms.manifest.host_permissions || perms.manifest.host_permissions.length === 0,
+    JSON.stringify(perms.manifest.host_permissions || []));
+  check('manifest requests activeTab, not <all_urls> content script',
+    perms.manifest.permissions.includes('activeTab') &&
+    (!perms.manifest.content_scripts || perms.manifest.content_scripts.length === 0),
+    perms.manifest.permissions.join(','));
 
   await ctx.close();
+}
+
+(async () => {
+  console.log('— Part A: content-script integration —');
+  await partA();
+  console.log('\n— Part B: extension smoke (permission model) —');
+  await partB();
   console.log(failures ? `\n${failures} FAILURES` : '\nAll browser checks passed.');
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });

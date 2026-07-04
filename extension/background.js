@@ -1,17 +1,28 @@
 /**
- * KhmerLens service worker: per-tab enable state + toolbar badge.
- * State lives in chrome.storage.session so it survives worker suspension
- * but resets when the browser closes.
+ * KhmerLens service worker.
+ *
+ * Injection model: activeTab + scripting (no host permissions). The content
+ * script is injected only when the user activates KhmerLens on a tab (toolbar
+ * click or the Alt+K command), which grants a temporary activeTab permission.
+ * activeTab is revoked when the tab navigates, so we clear the tab's state on
+ * navigation and the user re-activates on the new page.
+ *
+ * State lives in chrome.storage.session so it survives worker suspension but
+ * resets when the browser closes:
+ *   enabledTabs[tabId]  = true   -> KhmerLens is on for this tab
+ *   injectedTabs[tabId] = true   -> content scripts are present in this tab
  */
 'use strict';
 
-function getState() {
-  return chrome.storage.session.get({ enabledTabs: {} })
-    .then(function (o) { return o.enabledTabs; });
-}
+var CONTENT_FILES = [
+  'lib/khmer.js',
+  'lib/dictionary.js',
+  'lib/popup.js',
+  'content/content.js',
+];
 
-function setState(enabledTabs) {
-  return chrome.storage.session.set({ enabledTabs: enabledTabs });
+function getSession() {
+  return chrome.storage.session.get({ enabledTabs: {}, injectedTabs: {} });
 }
 
 function updateBadge(tabId, on) {
@@ -21,22 +32,61 @@ function updateBadge(tabId, on) {
   }
 }
 
-function toggleTab(tab) {
-  if (!tab || !tab.id) return;
-  getState().then(function (enabledTabs) {
-    var key = String(tab.id);
-    var on = !enabledTabs[key];
-    if (on) enabledTabs[key] = true;
-    else delete enabledTabs[key];
-    setState(enabledTabs).then(function () {
-      updateBadge(tab.id, on);
-      chrome.tabs.sendMessage(
-        tab.id,
-        { type: 'khmerlens:setEnabled', enabled: on },
-        function () { void chrome.runtime.lastError; } // page may lack content script
-      );
-    });
+function injectInto(tabId) {
+  return chrome.scripting.executeScript({
+    target: { tabId: tabId, allFrames: true },
+    files: CONTENT_FILES,
   });
+}
+
+async function toggleTab(tab) {
+  if (!tab || !tab.id) return;
+  var tabId = tab.id;
+  var key = String(tabId);
+  var s = await getSession();
+  var turningOn = !s.enabledTabs[key];
+
+  if (turningOn) {
+    // Record enabled state BEFORE injecting: the content script asks us for
+    // its state on load (getEnabled) and self-enables from the answer.
+    s.enabledTabs[key] = true;
+    await chrome.storage.session.set({ enabledTabs: s.enabledTabs });
+
+    if (!s.injectedTabs[key]) {
+      try {
+        await injectInto(tabId);
+        s.injectedTabs[key] = true;
+        await chrome.storage.session.set({ injectedTabs: s.injectedTabs });
+      } catch (e) {
+        // restricted page (chrome://, Web Store, PDF viewer, etc.)
+        delete s.enabledTabs[key];
+        await chrome.storage.session.set({ enabledTabs: s.enabledTabs });
+        chrome.action.setBadgeText({ tabId: tabId, text: '' });
+        chrome.action.setTitle({
+          tabId: tabId,
+          title: 'KhmerLens can’t run on this page',
+        });
+        return;
+      }
+    } else {
+      // already injected (e.g. toggled off then on without navigating)
+      sendEnabled(tabId, true);
+    }
+    updateBadge(tabId, true);
+  } else {
+    delete s.enabledTabs[key];
+    await chrome.storage.session.set({ enabledTabs: s.enabledTabs });
+    sendEnabled(tabId, false);
+    updateBadge(tabId, false);
+  }
+}
+
+function sendEnabled(tabId, enabled) {
+  chrome.tabs.sendMessage(
+    tabId,
+    { type: 'khmerlens:setEnabled', enabled: enabled },
+    function () { void chrome.runtime.lastError; }
+  );
 }
 
 chrome.action.onClicked.addListener(toggleTab);
@@ -45,30 +95,42 @@ chrome.commands.onCommand.addListener(function (command, tab) {
   if (command === 'toggle-khmerlens') toggleTab(tab);
 });
 
+// Content script asks for its tab's state right after injection.
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (msg && msg.type === 'khmerlens:getEnabled' && sender.tab && sender.tab.id) {
-    getState().then(function (enabledTabs) {
-      sendResponse({ enabled: !!enabledTabs[String(sender.tab.id)] });
+    getSession().then(function (s) {
+      sendResponse({ enabled: !!s.enabledTabs[String(sender.tab.id)] });
     });
     return true; // async response
   }
 });
 
-// re-assert badge after navigation (badge text persists per tab, but keep
-// state consistent if the tab was toggled on)
+// Navigation revokes activeTab and tears down injected scripts: clear the
+// tab's state so the user re-activates on the new page.
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo) {
-  if (changeInfo.status === 'loading') {
-    getState().then(function (enabledTabs) {
-      updateBadge(tabId, !!enabledTabs[String(tabId)]);
+  if (changeInfo.status !== 'loading') return;
+  var key = String(tabId);
+  getSession().then(function (s) {
+    if (!s.enabledTabs[key] && !s.injectedTabs[key]) return;
+    delete s.enabledTabs[key];
+    delete s.injectedTabs[key];
+    chrome.storage.session.set({
+      enabledTabs: s.enabledTabs,
+      injectedTabs: s.injectedTabs,
     });
-  }
+    chrome.action.setBadgeText({ tabId: tabId, text: '' });
+  });
 });
 
 chrome.tabs.onRemoved.addListener(function (tabId) {
-  getState().then(function (enabledTabs) {
-    if (enabledTabs[String(tabId)]) {
-      delete enabledTabs[String(tabId)];
-      setState(enabledTabs);
-    }
+  var key = String(tabId);
+  getSession().then(function (s) {
+    if (!s.enabledTabs[key] && !s.injectedTabs[key]) return;
+    delete s.enabledTabs[key];
+    delete s.injectedTabs[key];
+    chrome.storage.session.set({
+      enabledTabs: s.enabledTabs,
+      injectedTabs: s.injectedTabs,
+    });
   });
 });

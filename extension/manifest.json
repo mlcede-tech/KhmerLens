@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Hover over Khmer text to see instant English definitions, romanization, and word frequency. Works fully offline.",
   "minimum_chrome_version": "105",
-  "permissions": ["storage", "clipboardWrite"],
+  "permissions": ["activeTab", "scripting", "storage", "clipboardWrite"],
   "background": {
     "service_worker": "background.js"
   },
@@ -23,20 +23,6 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": [
-        "lib/khmer.js",
-        "lib/dictionary.js",
-        "lib/popup.js",
-        "content/content.js"
-      ],
-      "all_frames": true,
-      "match_about_blank": true,
-      "run_at": "document_idle"
-    }
-  ],
   "web_accessible_resources": [
     {
       "resources": ["data/dictionary.json", "content/popup.css"],

@@ -6,6 +6,12 @@
 (function () {
   'use strict';
 
+  // Guard against double injection: the background worker tracks injected
+  // tabs, but if the same tab is ever injected twice we must not register a
+  // second set of document listeners.
+  if (globalThis.__khmerLensLoaded) return;
+  globalThis.__khmerLensLoaded = true;
+
   var core = globalThis.KhmerLensCore;
   var dictApi = globalThis.KhmerLensDict;
   var popupMath = globalThis.KhmerLensPopup;
@@ -480,4 +486,14 @@
     provider: null,
     register: function (p) { this.provider = p; },
   };
+
+  // Test hook: only exposed when a harness sets the flag before injection.
+  // Lets the browser integration test drive the content script directly
+  // without simulating the (un-simulatable) toolbar click.
+  if (globalThis.__khmerLensTest) {
+    globalThis.KhmerLensTest = {
+      setEnabled: setEnabled,
+      isVisible: function () { return visible; },
+    };
+  }
 })();

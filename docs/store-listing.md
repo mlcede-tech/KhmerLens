@@ -104,39 +104,42 @@ See [Attribution](../ATTRIBUTION.md) for complete source information.
 
 **What we copy:** The Khmer word + English definition (nothing more)
 
-### Manifest Host Permissions (all_urls / <all_urls>)
+### activeTab
 
-**Purpose:** Detect Khmer text on any webpage and show popups
+**Purpose:** Read the text on the current page so KhmerLens can detect the Khmer word under the cursor and show its definition.
 
-**Why all URLs are needed:**
-- Khmer text appears on many different websites
-- We need to inject our content script on every page to detect Khmer characters
-- All lookups are performed locally (no data sent to any server)
+**Why activeTab (and not broad host access):** KhmerLens requests **no host permissions** and does **not** run on any site automatically. It only gains access to a page when you explicitly activate it — by clicking the toolbar icon or pressing Alt+K on that tab. The access is temporary and is revoked when you navigate away.
 
 **What we do with page content:**
-- Read text only to detect Khmer characters
-- Show popups when you hover
+- Read text only to detect Khmer characters under the cursor
+- Show a popup when you hover
 - Never transmit page content or browsing data
+
+### scripting
+
+**Purpose:** Inject the KhmerLens content script into the tab at the moment you activate it (the mechanism that pairs with activeTab).
+
+**When used:** Only after you click the toolbar icon or press Alt+K on a tab. Nothing is injected until then.
 
 ---
 
-## Screenshots (Placeholder Paths)
+## Screenshots
 
-Include the following screenshots in your Web Store listing:
+Provided in `docs/store-assets/` (captures of the live extension, exact store dimensions):
 
-1. **screenshot-1.png** — Main popup showing word definition
-2. **screenshot-2.png** — Options page showing customization choices
-3. **screenshot-3.png** — Keyboard shortcuts and usage tips
+1. **screenshot-1.png** (1280×800) — popup on a Khmer Wikipedia article
+2. **screenshot-2.png** (1280×800) — popup on a Khmer news page, alternates cycle (dark)
+3. **screenshot-3.png** (1280×800) — options page with live preview
+4. **promo-tile.png** (440×280) — small promo tile
 
-*(Actual images to be generated separately)*
+Store icon: `extension/icons/icon128.png`.
 
 ---
 
 ## Additional Links
 
-- **Repository:** [GitHub link to be added]
-- **Report a bug:** [Issue tracker link to be added]
-- **Support email:** [Support contact to be added]
+- **Repository:** https://github.com/mlimcede-tech/KhmerLens
+- **Report a bug:** https://github.com/mlimcede-tech/KhmerLens/issues
 
 ---
 

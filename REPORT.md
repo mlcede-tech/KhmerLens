@@ -26,6 +26,10 @@
   mutation, safe inside links), 50 ms hover debounce, per-tab toggle with
   ON badge, Alt+K shortcut, Shift/C/N/Esc keys, options page, iframes and
   scrolling containers verified.
+- **Permission model**: `activeTab` + `scripting`, **no host permissions**.
+  KhmerLens injects only when the user activates it on a tab, so the install
+  shows no "read data on all sites" warning. Trade-off: activation ends on
+  navigation (re-activate on the new page).
 - **Tests**: 29 node unit tests (segmentation edge cases with coeng,
   ZWSP, mixed Khmer/Latin/digits, Khmer punctuation; dictionary format;
   popup positioning) + the Playwright live-browser suite.

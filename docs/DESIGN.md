@@ -4,8 +4,8 @@
 
 ```
 extension/
-  manifest.json          MV3; content scripts on <all_urls>, all_frames
-  background.js          service worker: per-tab enable state + badge
+  manifest.json          MV3; activeTab + scripting, no host permissions
+  background.js          service worker: injects on activation, per-tab state
   lib/khmer.js           pure segmentation/longest-match logic (Node-testable)
   lib/dictionary.js      dictionary load + lookup (Node-testable)
   lib/popup.js           popup positioning math (Node-testable)
@@ -14,6 +14,17 @@ extension/
   data/dictionary.json   compiled dictionary (see /data-pipeline)
   options/               options page (chrome.storage.sync settings)
 ```
+
+Injection model: **activeTab + scripting**, no host permissions. The content
+bundle is injected via `chrome.scripting.executeScript` only when the user
+activates KhmerLens on a tab (toolbar click or Alt+K). `activeTab` is revoked
+on navigation, so the background clears the tab's state on `tabs.onUpdated`
+(loading) and the user re-activates on the new page. `background.js` tracks
+`enabledTabs` and `injectedTabs` in `chrome.storage.session`; `content.js` is
+guarded (`__khmerLensLoaded`) so a double injection never double-binds
+listeners. This replaced an earlier `<all_urls>`/`all_frames` declarative
+model to remove the broad-host-access install warning and Web Store review
+friction.
 
 Lookup flow: `mousemove` (debounced 50 ms) → `caretPositionFromPoint` →
 `KhmerLensCore.findMatches(text, offset, dict.has, dict.maxWordLen)` →

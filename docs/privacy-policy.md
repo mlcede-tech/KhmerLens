@@ -87,13 +87,11 @@ Stores your extension settings locally. No data is sent to any server unless you
 
 Allows you to copy a word and its definition to your clipboard using the 'c' keyboard shortcut. This is performed locally; the clipboard is not accessed by any external service.
 
-### Host Permissions (`<all_urls>`)
+### `activeTab` and `scripting`
 
-Allows the extension to:
-- Read page content to detect Khmer text
-- Show popups when you hover
+KhmerLens requests **no host permissions** and does not run on any website automatically. It reads a page only when you explicitly activate it on that tab (toolbar icon or Alt+K), using Chrome's `activeTab` permission; `scripting` is the mechanism that loads KhmerLens into the tab at that moment. The access is temporary and is revoked when you navigate away.
 
-**Important:** The extension reads text to identify Khmer characters. This is performed entirely locally. Page content is **never transmitted** to any server. The extension operates offline.
+**Important:** When active, the extension reads text solely to identify the Khmer word under your cursor. This is performed entirely locally. Page content is **never transmitted** to any server. The extension operates offline.
 
 ---
 

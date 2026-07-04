@@ -40,10 +40,12 @@ Follow the "Quick Load" steps above, using the cloned `extension/` folder.
 
 ### Basic Usage
 
-1. Enable the extension by clicking the toolbar icon (shows "ON" badge when active)
-2. Hover over any Khmer text on a webpage
+1. Click the toolbar icon (or press Alt+K) to activate KhmerLens on the current tab — the badge shows "ON"
+2. Hover over any Khmer text on the page
 3. A popup appears with the word, definitions, and metadata
 4. Move the cursor away or press Esc to dismiss
+
+KhmerLens uses Chrome's `activeTab` model: it requests no host permissions and only reads a page after you activate it there. Because that access ends when you navigate, KhmerLens turns off on the new page — click the icon (or Alt+K) again to re-activate.
 
 ### Keyboard Shortcuts
 
