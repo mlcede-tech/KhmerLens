@@ -1,0 +1,12 @@
+{
+  "name": "khmerlens-tests",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node --test",
+    "verify": "node browser-verify.js"
+  },
+  "dependencies": {
+    "playwright": "^1.61.1"
+  },
+  "private": true
+}

@@ -1,0 +1,386 @@
+/* KhmerLens options — consistent with the lookup popup (content/popup.css). */
+
+:root {
+  color-scheme: light dark;
+  --bg: #fbfbfa;
+  --surface: #ffffff;
+  --ink: #1a1d21;
+  --muted: #6b7280;
+  --accent: #b45309;
+  --accent-ink: #ffffff;
+  --accent-soft: #fef3c7;
+  --accent-soft-ink: #92400e;
+  --border: rgba(0, 0, 0, 0.09);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --track-off: rgba(0, 0, 0, 0.16);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 6px 20px rgba(0, 0, 0, 0.05);
+  --shadow-pop: 0 6px 24px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
+  --khmer: "Khmer OS", "Khmer OS System", "Noto Sans Khmer",
+    "Khmer Sangam MN", "Khmer UI", "Leelawadee UI", sans-serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16181c;
+    --surface: #1f2329;
+    --ink: #e8eaed;
+    --muted: #9aa0a6;
+    --accent: #fbbf24;
+    --accent-ink: #1a1d21;
+    --accent-soft: #3d3524;
+    --accent-soft-ink: #fbbf24;
+    --border: rgba(255, 255, 255, 0.1);
+    --border-strong: rgba(255, 255, 255, 0.2);
+    --track-off: rgba(255, 255, 255, 0.18);
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.35);
+    --shadow-pop: 0 6px 24px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--bg); }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px 24px 72px;
+}
+
+/* ---------------------------------------------------------- masthead */
+.masthead {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.mark {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--khmer);
+  font-size: 26px;
+  line-height: 1;
+  box-shadow: 0 2px 8px color-mix(in oklab, var(--accent) 40%, transparent);
+}
+
+.masthead-text h1 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.tagline {
+  margin: 1px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ------------------------------------------------------------ tuner */
+.tuner {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+@media (min-width: 560px) {
+  .tuner {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: 24px;
+  }
+}
+
+/* live preview -------------------------------------------------------- */
+.preview-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 12px;
+  background:
+    radial-gradient(120% 120% at 30% 0%,
+      color-mix(in oklab, var(--accent) 9%, var(--bg)) 0%,
+      var(--bg) 60%);
+  border: 1px solid var(--border);
+  min-height: 100%;
+}
+
+.preview-caption {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* the mini popup — mirrors content/popup.css .kl-card */
+.kl-preview {
+  --card-bg: var(--surface);
+  --card-fg: var(--ink);
+  --card-muted: var(--muted);
+  --card-accent: var(--accent);
+  --card-border: var(--border);
+  --card-chip-bg: var(--accent-soft);
+  --card-chip-fg: var(--accent-soft-ink);
+
+  align-self: center;
+  width: 100%;
+  max-width: 300px;
+  padding: 12px 14px 10px;
+  background: var(--card-bg);
+  color: var(--card-fg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-pop);
+  transition: background 180ms var(--ease), color 180ms var(--ease),
+    border-color 180ms var(--ease);
+}
+
+/* explicit theme override for the preview (independent of system) */
+.kl-preview.force-light {
+  --card-bg: #ffffff; --card-fg: #1a1d21; --card-muted: #6b7280;
+  --card-accent: #b45309; --card-border: rgba(0,0,0,0.08);
+  --card-chip-bg: #fef3c7; --card-chip-fg: #92400e;
+}
+.kl-preview.force-dark {
+  --card-bg: #1f2329; --card-fg: #e8eaed; --card-muted: #9aa0a6;
+  --card-accent: #fbbf24; --card-border: rgba(255,255,255,0.1);
+  --card-chip-bg: #3d3524; --card-chip-fg: #fbbf24;
+}
+
+.kl-preview.kl-fs-small { font-size: 12px; }
+.kl-preview.kl-fs-medium { font-size: 13px; }
+.kl-preview.kl-fs-large { font-size: 15px; }
+
+.kl-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.kl-word {
+  font-family: var(--khmer);
+  font-size: 2em;
+  line-height: 1.6;
+  color: var(--card-fg);
+}
+.kl-freq {
+  font-size: 0.78em;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--card-chip-bg);
+  color: var(--card-chip-fg);
+  font-weight: 600;
+}
+.kl-roman {
+  margin: 2px 0 4px;
+  color: var(--card-accent);
+  font-style: italic;
+  font-size: 1em;
+}
+.kl-roman.hidden { display: none; }
+.kl-body { margin: 6px 0 8px; }
+.kl-pos {
+  font-size: 0.78em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--card-muted);
+  margin-right: 6px;
+}
+.kl-gloss { color: var(--card-fg); }
+.kl-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--card-border);
+  padding-top: 7px;
+  font-size: 0.85em;
+}
+.kl-link { color: var(--card-accent); }
+.kl-keys { margin-left: auto; color: var(--card-muted); font-size: 0.92em; }
+
+/* controls ------------------------------------------------------------ */
+.controls { display: flex; flex-direction: column; gap: 4px; }
+
+.field { padding: 10px 0; }
+.field + .field { border-top: 1px solid var(--border); }
+.field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.field-label {
+  display: block;
+  font-weight: 550;
+  font-size: 13.5px;
+}
+.field-help {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.field > .field-label { margin-bottom: 9px; }
+
+/* segmented control --------------------------------------------------- */
+.segmented {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding: 3px;
+  background: color-mix(in oklab, var(--ink) 6%, transparent);
+  border-radius: 10px;
+  isolation: isolate;
+}
+.segmented button {
+  position: relative;
+  z-index: 1;
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 7px 4px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: color 160ms var(--ease);
+}
+.segmented button:hover { color: var(--ink); }
+.segmented button[aria-checked="true"] { color: var(--ink); font-weight: 600; }
+.segmented .thumb {
+  position: absolute;
+  z-index: 0;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / 3);
+  background: var(--surface);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--border);
+  transform: translateX(calc(var(--i, 0) * 100%));
+  transition: transform 220ms var(--ease);
+}
+.segmented button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* toggle switch ------------------------------------------------------- */
+.switch { flex: none; display: inline-flex; cursor: pointer; }
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.track {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--track-off);
+  transition: background 180ms var(--ease);
+}
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform 200ms var(--ease);
+}
+.switch input:checked + .track { background: var(--accent); }
+.switch input:checked + .track .knob { transform: translateX(18px); }
+.switch input:focus-visible + .track {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.saved {
+  margin: 6px 0 0;
+  min-height: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 200ms var(--ease), transform 200ms var(--ease);
+}
+.saved.show { opacity: 1; transform: none; }
+
+/* --------------------------------------------------------- reference */
+.ref { margin-top: 34px; }
+.ref h2 {
+  font-size: 15px;
+  font-weight: 650;
+  margin: 0 0 12px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--border);
+}
+.ref h3 { font-size: 13px; font-weight: 600; margin: 20px 0 10px; }
+
+.steps { margin: 0; padding-left: 20px; }
+.steps li { margin: 6px 0; }
+
+.shortcuts { margin: 0; display: grid; gap: 8px; }
+.shortcuts > div {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  align-items: baseline;
+  gap: 14px;
+}
+.shortcuts dt { display: flex; gap: 3px; }
+.shortcuts dd { margin: 0; color: var(--ink); }
+.dd-note { color: var(--muted); font-size: 12px; }
+
+kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1;
+  padding: 3px 6px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+}
+
+.sources { margin: 8px 0; padding-left: 20px; }
+.sources li { margin: 5px 0; }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:hover { text-decoration-thickness: 2px; }
+.colophon { color: var(--muted); font-size: 13px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, .thumb, .knob, .kl-preview, .saved { transition: none !important; }
+}

@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "KhmerLens — Khmer Popup Dictionary",
+  "version": "1.0.0",
+  "description": "Hover over Khmer text to see instant English definitions, romanization, and word frequency. Works fully offline.",
+  "minimum_chrome_version": "105",
+  "permissions": ["storage", "clipboardWrite"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "KhmerLens: click to toggle on this tab",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "lib/khmer.js",
+        "lib/dictionary.js",
+        "lib/popup.js",
+        "content/content.js"
+      ],
+      "all_frames": true,
+      "match_about_blank": true,
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["data/dictionary.json", "content/popup.css"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "commands": {
+    "toggle-khmerlens": {
+      "suggested_key": {
+        "default": "Alt+K"
+      },
+      "description": "Toggle KhmerLens on the current tab"
+    }
+  },
+  "options_page": "options/options.html"
+}

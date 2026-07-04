@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>KhmerLens Options</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <header class="masthead">
+      <span class="mark" aria-hidden="true">ខ</span>
+      <div class="masthead-text">
+        <h1>KhmerLens</h1>
+        <p class="tagline">Khmer hover dictionary</p>
+      </div>
+    </header>
+
+    <!-- Live preview + controls -->
+    <section class="tuner" aria-label="Popup appearance">
+      <div class="preview-wrap">
+        <p class="preview-caption">Live preview</p>
+        <!-- Faithful mini-render of the lookup popup; JS toggles classes -->
+        <div class="kl-preview kl-fs-medium" id="preview">
+          <div class="kl-head">
+            <span class="kl-word">ភ្នំពេញ</span>
+            <span class="kl-freq">common</span>
+          </div>
+          <p class="kl-roman" id="preview-roman">phnum pɨñ</p>
+          <div class="kl-body">
+            <div class="kl-sense">
+              <span class="kl-pos">noun</span>
+              <span class="kl-gloss">Phnom Penh (the capital of Cambodia)</span>
+            </div>
+          </div>
+          <div class="kl-foot">
+            <span class="kl-link">kheng.info ↗</span>
+            <span class="kl-keys">⇧ alts · C copy</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="field">
+          <label class="field-label" id="theme-label">Theme</label>
+          <div class="segmented" role="radiogroup" aria-labelledby="theme-label" data-name="theme">
+            <button type="button" role="radio" data-value="light">Light</button>
+            <button type="button" role="radio" data-value="dark">Dark</button>
+            <button type="button" role="radio" data-value="auto">Auto</button>
+            <span class="thumb" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" id="fontsize-label">Font size</label>
+          <div class="segmented" role="radiogroup" aria-labelledby="fontsize-label" data-name="fontSize">
+            <button type="button" role="radio" data-value="small">Small</button>
+            <button type="button" role="radio" data-value="medium">Medium</button>
+            <button type="button" role="radio" data-value="large">Large</button>
+            <span class="thumb" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <div class="field field-row">
+          <div>
+            <label class="field-label" for="showRoman">Romanization</label>
+            <p class="field-help">Show phonetic transcription under the word</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="showRoman">
+            <span class="track" aria-hidden="true"><span class="knob"></span></span>
+          </label>
+        </div>
+
+        <div class="field field-row">
+          <div>
+            <label class="field-label" for="highlight">Highlight on page</label>
+            <p class="field-help">Underlay the matched word while the popup shows</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="highlight">
+            <span class="track" aria-hidden="true"><span class="knob"></span></span>
+          </label>
+        </div>
+
+        <p class="saved" id="saved" role="status">Saved</p>
+      </div>
+    </section>
+
+    <!-- Reference -->
+    <section class="ref">
+      <h2>Getting started</h2>
+      <ol class="steps">
+        <li>Click the KhmerLens toolbar icon to turn it on for the current tab — the badge shows <strong>ON</strong>.</li>
+        <li>Hover over any Khmer word and the popup appears with its definition.</li>
+      </ol>
+
+      <h3>Keyboard shortcuts</h3>
+      <dl class="shortcuts">
+        <div><dt><kbd>Alt</kbd><kbd>K</kbd></dt><dd>Toggle KhmerLens on the current tab <span class="dd-note">(rebind at chrome://extensions/shortcuts)</span></dd></div>
+        <div><dt><kbd>Shift</kbd></dt><dd>Cycle to shorter / alternative matches</dd></div>
+        <div><dt><kbd>C</kbd></dt><dd>Copy the word and definition</dd></div>
+        <div><dt><kbd>N</kbd></dt><dd>Jump to the next word</dd></div>
+        <div><dt><kbd>Esc</kbd></dt><dd>Hide the popup</dd></div>
+      </dl>
+    </section>
+
+    <section class="ref">
+      <h2>About &amp; attribution</h2>
+      <p>KhmerLens works fully offline and collects no data. Dictionary compiled from:</p>
+      <ul class="sources">
+        <li><a href="https://kaikki.org/dictionary/Khmer/" target="_blank" rel="noopener">Wiktionary, via kaikki.org</a> — CC BY-SA 4.0. The bundled dictionary is likewise available under CC BY-SA 4.0.</li>
+        <li><a href="https://github.com/silnrsi/khmerlbdict" target="_blank" rel="noopener">SIL khmerlbdict</a> frequency wordlist — MIT License, © 2015 SIL NRSI.</li>
+      </ul>
+      <p class="colophon">Inspired by the <a href="https://github.com/cschiller/zhongwen" target="_blank" rel="noopener">Zhongwen</a> popup dictionary for Chinese.</p>
+    </section>
+  </main>
+  <script src="options.js"></script>
+</body>
+</html>

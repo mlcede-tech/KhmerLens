@@ -1,0 +1,174 @@
+/* KhmerLens popup card — lives inside a closed shadow root. */
+:host {
+  all: initial;
+}
+
+.kl-card {
+  --kl-bg: #ffffff;
+  --kl-fg: #1a1d21;
+  --kl-muted: #6b7280;
+  --kl-accent: #b45309;
+  --kl-border: rgba(0, 0, 0, 0.08);
+  --kl-shadow: 0 6px 24px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
+  --kl-chip-bg: #fef3c7;
+  --kl-chip-fg: #92400e;
+
+  position: fixed;
+  box-sizing: border-box;
+  min-width: 240px;
+  max-width: 360px;
+  padding: 12px 14px 10px;
+  background: var(--kl-bg);
+  color: var(--kl-fg);
+  border: 1px solid var(--kl-border);
+  border-radius: 12px;
+  box-shadow: var(--kl-shadow);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 90ms ease-out, transform 90ms ease-out;
+  pointer-events: none; /* never intercept the page */
+  overflow-wrap: anywhere;
+}
+
+.kl-card .kl-ext,
+.kl-card .kl-save {
+  pointer-events: auto;
+}
+
+.kl-card.kl-hidden {
+  opacity: 0;
+  transform: translateY(4px);
+  visibility: hidden;
+}
+
+.kl-card.kl-dark {
+  --kl-bg: #1f2329;
+  --kl-fg: #e8eaed;
+  --kl-muted: #9aa0a6;
+  --kl-accent: #fbbf24;
+  --kl-border: rgba(255, 255, 255, 0.1);
+  --kl-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --kl-chip-bg: #3d3524;
+  --kl-chip-fg: #fbbf24;
+}
+
+/* font size options */
+.kl-card.kl-fs-small { font-size: 12px; }
+.kl-card.kl-fs-medium { font-size: 13px; }
+.kl-card.kl-fs-large { font-size: 15px; }
+
+.kl-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.kl-word {
+  font-family: "Khmer OS", "Khmer OS System", "Noto Sans Khmer",
+    "Khmer Sangam MN", "Khmer UI", "Leelawadee UI", sans-serif;
+  font-size: 2em;
+  line-height: 1.6;
+  color: var(--kl-fg);
+}
+
+.kl-freq {
+  font-size: 0.78em;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--kl-chip-bg);
+  color: var(--kl-chip-fg);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.kl-alt {
+  margin-left: auto;
+  font-size: 0.8em;
+  color: var(--kl-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.kl-roman {
+  color: var(--kl-accent);
+  font-style: italic;
+  margin: 2px 0 4px;
+}
+
+.kl-body {
+  margin: 6px 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 260px;
+  overflow: hidden;
+}
+
+.kl-sense {
+  display: block;
+}
+
+.kl-pos {
+  display: inline-block;
+  font-size: 0.78em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--kl-muted);
+  margin-right: 6px;
+}
+
+.kl-gloss {
+  color: var(--kl-fg);
+}
+
+.kl-nogloss {
+  color: var(--kl-muted);
+  font-style: italic;
+}
+
+.kl-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--kl-border);
+  padding-top: 7px;
+  font-size: 0.85em;
+}
+
+.kl-ext {
+  color: var(--kl-accent);
+  text-decoration: none;
+}
+.kl-ext:hover {
+  text-decoration: underline;
+}
+
+.kl-save {
+  background: none;
+  border: 1px solid var(--kl-border);
+  border-radius: 6px;
+  color: var(--kl-muted);
+  font: inherit;
+  font-size: 0.9em;
+  padding: 1px 8px;
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.kl-keys {
+  margin-left: auto;
+  color: var(--kl-muted);
+  font-size: 0.82em;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kl-card {
+    transition: none;
+  }
+}
