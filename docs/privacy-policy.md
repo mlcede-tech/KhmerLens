@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**KhmerLens** — Last updated: July 4, 2026
+**KhmerLens** — Last updated: July 12, 2026
 
 ## Overview
 
@@ -39,6 +39,7 @@ Your preferences are saved to your device:
 - Font size preference
 - Romanization display toggle (on/off)
 - On-page highlight toggle (on/off)
+- Anki integration settings (on/off, AnkiConnect address, deck, note type, field mapping, tags)
 
 **How long:** Until you uninstall the extension or manually clear them
 
@@ -52,6 +53,10 @@ KhmerLens includes a compiled dictionary (~1.8 MB) with 21,514 Khmer words and E
 - Built into the extension (no network download)
 - Stored locally when you install the extension
 - All word lookups performed locally, never transmitted
+
+### Pronunciation Audio
+
+Pronunciation recordings (freely licensed, from Wikimedia Commons / Lingua Libre contributors) are bundled inside the extension and played locally. If no recording exists, KhmerLens can use your operating system's Khmer text-to-speech voice, which also runs locally. No audio request leaves your device.
 
 ---
 
@@ -92,6 +97,10 @@ Allows you to copy a word and its definition to your clipboard using the 'c' key
 KhmerLens requests **no host permissions** and does not run on any website automatically. It reads a page only when you explicitly activate it on that tab (toolbar icon or Alt+K), using Chrome's `activeTab` permission; `scripting` is the mechanism that loads KhmerLens into the tab at that moment. The access is temporary and is revoked when you navigate away.
 
 **Important:** When active, the extension reads text solely to identify the Khmer word under your cursor. This is performed entirely locally. Page content is **never transmitted** to any server. The extension operates offline.
+
+### Optional: `http://127.0.0.1/*` and `http://localhost/*` (Anki integration)
+
+Requested **only if you enable the Anki integration** in the options page. It lets KhmerLens talk to the AnkiConnect add-on of the Anki desktop app **running on your own computer** (loopback address — this traffic never leaves your device). When you press **A** or click **★ Anki** on a word, that word, its romanization, and its definition are sent to your local Anki app and nowhere else. If you never enable the integration, this permission is never requested.
 
 ---
 
@@ -157,7 +166,7 @@ We may update this privacy policy as needed. If we make material changes, we wil
 | Data collection | None |
 | Tracking | None |
 | Analytics | None |
-| Network requests | None (except optional user-clicked external links) |
+| Network requests | None (except optional user-clicked external links, and the optional Anki integration which talks only to the Anki app on your own computer) |
 | Third-party services | None |
 | Local settings | Stored on your device only |
 | Advertising | None |

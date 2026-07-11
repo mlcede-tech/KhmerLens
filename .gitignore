@@ -3,7 +3,7 @@ tests/node_modules/
 
 # Raw pipeline sources — regenerable via data-pipeline/download.sh
 # (the compiled extension/data/dictionary.json IS committed)
-data-pipeline/raw/
+data-pipeline/raw
 
 # OS / editor cruft
 .DS_Store
