@@ -20,5 +20,10 @@ unzip -l "$OUT" | tail -n +2 | head -30
 echo "---"
 echo "Size: $(du -h "$OUT" | cut -f1)"
 echo "Verify manifest is at root:"
-unzip -l "$OUT" | grep -q ' manifest.json$' && echo "  OK — manifest.json at ZIP root" \
-  || { echo "  ERROR — manifest.json not at root"; exit 1; }
+LISTING=$(unzip -l "$OUT")
+if echo "$LISTING" | grep -q ' manifest.json$'; then
+  echo "  OK — manifest.json at ZIP root"
+else
+  echo "  ERROR — manifest.json not at root"
+  exit 1
+fi

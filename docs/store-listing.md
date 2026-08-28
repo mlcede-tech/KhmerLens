@@ -60,7 +60,7 @@ Hover over any Khmer word on any webpage, and a popup appears instantly with:
 
 - **storage** — Stores your settings (theme, font size, etc.) locally
 - **clipboardWrite** — Allows you to copy word + definition with the 'c' shortcut
-- **Read all webpage content** — Detects Khmer text and hovering for popups
+- **activeTab + scripting** — Detects Khmer text and hovering for popups, but only on tabs you explicitly activate (toolbar click or Alt+K); no broad "read and change all your data on all websites" access
 
 **Privacy**
 
@@ -138,8 +138,8 @@ Store icon: `extension/icons/icon128.png`.
 
 ## Additional Links
 
-- **Repository:** https://github.com/mlimcede-tech/KhmerLens
-- **Report a bug:** https://github.com/mlimcede-tech/KhmerLens/issues
+- **Repository:** https://github.com/mlcede-tech/KhmerLens
+- **Report a bug:** https://github.com/mlcede-tech/KhmerLens/issues
 
 ---
 
