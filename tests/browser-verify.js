@@ -65,6 +65,8 @@ function popupState(page) {
       word: q('.kl-word'), roman: q('.kl-roman'),
       gloss: q('.kl-gloss') || q('.kl-nogloss'), alt: q('.kl-alt'),
       dark: card.classList.contains('kl-dark'),
+      keys: q('.kl-keys'),
+      audioBtn: !!card.querySelector('.kl-audio'),
       inViewport: rect.left >= 0 && rect.top >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight,
       highlighted: !!(CSS.highlights && CSS.highlights.get('khmerlens')),
     };
@@ -160,6 +162,66 @@ async function partA() {
   check('romanization shown', st.roman === null || st.roman.length > 0, st.roman);
   check('dark mode applied (auto theme)', st.visible && st.dark);
   await page2.screenshot({ path: path.join(SHOTS, '04-wikipedia-dark.png') });
+
+  // --- audio button + anki flow (news page, anki enabled via settings) ---
+  const page3 = await newEnabledPage(browser, server, `${PAGES}/news.html`, 'light');
+  await page3.evaluate(() =>
+    new Promise((r) => chrome.storage.sync.set({ ankiEnabled: true }, r)));
+  // toggle off/on so the content script re-reads settings
+  await page3.evaluate(() => {
+    window.KhmerLensTest.setEnabled(false);
+    window.KhmerLensTest.setEnabled(true);
+  });
+
+  // hover the word ខ្មែរ, which ships with a bundled recording
+  const pt = await page3.evaluate(() => {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const i = node.data.indexOf('ខ្មែរ');
+      if (i !== -1) {
+        const r = new Range(); r.setStart(node, i); r.setEnd(node, i + 1);
+        const rect = r.getBoundingClientRect();
+        if (rect.width || rect.height) {
+          return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+        }
+      }
+    }
+    return null;
+  });
+  check('hover target found (ខ្មែរ)', !!pt);
+  if (pt) {
+    await page3.mouse.move(pt.x, pt.y);
+    await page3.waitForTimeout(400);
+    // the longest match under the cursor may be a compound; cycle to ខ្មែរ
+    for (let i = 0; i < 5; i++) {
+      st = await popupState(page3);
+      if (st.word === 'ខ្មែរ') break;
+      await page3.keyboard.press('Shift');
+      await page3.waitForTimeout(120);
+    }
+    check('popup on ខ្មែរ', st.word === 'ខ្មែរ', st.word);
+    check('audio button shown for bundled recording', st.audioBtn);
+    const hasAnkiButton = await page3.evaluate(() => {
+      const host = document.getElementById('khmerlens-host');
+      const card = host && host.shadowRoot && host.shadowRoot.querySelector('.kl-card');
+      return !!(card && card.querySelector('.kl-anki'));
+    });
+    check('no clickable anki button (add is keyboard-only, "A")', !hasAnkiButton);
+    check('keys hint mentions sound and anki',
+      !!st.keys && st.keys.includes('S sound') && st.keys.includes('A anki'), st.keys);
+
+    await page3.keyboard.press('a');
+    await page3.waitForTimeout(200);
+    const added = await page3.evaluate(() => window.__ankiAdds || []);
+    check('A sends the word to the anki bridge',
+      added.length === 1 && added[0].word === 'ខ្មែរ' && added[0].senses.length > 0,
+      JSON.stringify(added).slice(0, 80));
+    check('foot flashes anki confirmation',
+      (await popupState(page3)).keys === 'Added to Anki ✓',
+      (await popupState(page3)).keys);
+    await page3.screenshot({ path: path.join(SHOTS, '05-audio-anki.png') });
+  }
 
   // --- disabled state ---
   await page2.evaluate(() => window.KhmerLensTest.setEnabled(false));

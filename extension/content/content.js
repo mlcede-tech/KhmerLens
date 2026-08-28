@@ -15,16 +15,20 @@
   var core = globalThis.KhmerLensCore;
   var dictApi = globalThis.KhmerLensDict;
   var popupMath = globalThis.KhmerLensPopup;
+  var audioApi = globalThis.KhmerLensAudioLib;
 
   var enabled = false;
   var dict = null;        // loaded lazily on first enable
   var dictLoading = null;
+  var audioIdx = null;    // bundled-recordings index, loaded with the dict
+  var ttsVoice = null;    // Khmer speechSynthesis voice, if the OS has one
 
   var settings = {
     theme: 'auto',        // light | dark | auto
     fontSize: 'medium',   // small | medium | large
     showRoman: true,
     highlight: true,
+    ankiEnabled: false,
   };
 
   // ---------------------------------------------------------------- state
@@ -67,6 +71,75 @@
         .then(function (d) { dict = d; return d; });
     }
     return dictLoading;
+  }
+
+  // ----------------------------------------------------------------- audio
+  function ensureAudio() {
+    if (!audioApi) return; // lib/audio.js not loaded: no audio affordance
+    if (!audioIdx) {
+      audioApi
+        .load(chrome.runtime.getURL('data/audio-index.json'))
+        .then(function (idx) { audioIdx = idx; });
+    }
+    if (!ttsVoice && typeof speechSynthesis !== 'undefined') {
+      ttsVoice = audioApi.pickKhmerVoice(speechSynthesis.getVoices());
+      if (!ttsVoice) {
+        // voices often arrive asynchronously after first getVoices() call
+        speechSynthesis.addEventListener('voiceschanged', function onv() {
+          ttsVoice = audioApi.pickKhmerVoice(speechSynthesis.getVoices());
+          if (ttsVoice) speechSynthesis.removeEventListener('voiceschanged', onv);
+        });
+      }
+    }
+  }
+
+  /** 'file' (bundled recording) | 'tts' (Khmer voice) | null */
+  function audioModeFor(word) {
+    if (audioIdx && audioIdx.file(word)) return 'file';
+    if (ttsVoice) return 'tts';
+    return null;
+  }
+
+  function speakCurrent() {
+    var word = current.matches[current.index].word;
+    var mode = audioModeFor(word);
+    if (mode === 'file') {
+      var player = new Audio(
+        chrome.runtime.getURL('data/audio/' + audioIdx.file(word)));
+      player.play().catch(function () { flashFoot('Audio failed'); });
+    } else if (mode === 'tts') {
+      var u = new SpeechSynthesisUtterance(word);
+      u.voice = ttsVoice;
+      u.lang = ttsVoice.lang;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    }
+  }
+
+  // ------------------------------------------------------------------ anki
+  function addToAnki() {
+    var m = current.matches[current.index];
+    var entry = { word: m.word, senses: dict ? dict.senses(m.word) || [] : [] };
+    try {
+      chrome.runtime.sendMessage(
+        { type: 'khmerlens:ankiAdd', entry: entry },
+        function (resp) {
+          if (chrome.runtime.lastError || !resp) {
+            flashFoot('Anki: extension error');
+          } else if (resp.ok) {
+            flashFoot('Added to Anki ✓');
+          } else if (resp.status === 'duplicate') {
+            flashFoot('Already in deck');
+          } else if (resp.status === 'unreachable') {
+            flashFoot('Anki not running?');
+          } else if (resp.status === 'unconfigured') {
+            flashFoot('Set up Anki in options');
+          } else {
+            flashFoot('Anki: ' + (resp.message || 'failed'));
+          }
+        }
+      );
+    } catch (e) { flashFoot('Anki: extension error'); }
   }
 
   // -------------------------------------------------------------- popup UI
@@ -122,6 +195,20 @@
     var head = el('div', 'kl-head');
     head.appendChild(el('span', 'kl-word', m.word));
 
+    var audioMode = audioModeFor(m.word);
+    if (audioMode) {
+      var speak = el('button', 'kl-audio', '🔊');
+      speak.type = 'button';
+      speak.title = audioMode === 'file'
+        ? 'Play native recording (S)'
+        : 'Speak with system Khmer voice (S)';
+      speak.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        speakCurrent();
+      });
+      head.appendChild(speak);
+    }
+
     var band = dict.freqBand(m.word);
     if (band) {
       head.appendChild(el('span', 'kl-freq kl-freq-' + band,
@@ -164,14 +251,19 @@
     ext.rel = 'noopener noreferrer';
     foot.appendChild(ext);
 
-    // v2 extension point: saved-word list (see docs/DESIGN.md). Disabled
-    // affordance kept in the DOM so the layout is ready.
-    var save = el('button', 'kl-save', '☆ Save');
-    save.disabled = true;
-    save.title = 'Word list coming in v2';
-    foot.appendChild(save);
+    if (!settings.ankiEnabled) {
+      // v2 extension point: saved-word list (see docs/DESIGN.md). Disabled
+      // affordance kept in the DOM so the layout is ready.
+      var save = el('button', 'kl-save', '☆ Save');
+      save.disabled = true;
+      save.title = 'Word list coming in v2';
+      foot.appendChild(save);
+    }
 
-    foot.appendChild(el('span', 'kl-keys', '⇧ alts · C copy · N next'));
+    var keys = '⇧ alts · C copy · N next';
+    if (audioMode) keys += ' · S sound';
+    if (settings.ankiEnabled) keys += ' · A anki';
+    foot.appendChild(el('span', 'kl-keys', keys));
     card.appendChild(foot);
   }
 
@@ -347,6 +439,17 @@
     if (ev.key === 'n' && !ev.metaKey && !ev.ctrlKey && !ev.altKey) {
       nextWord();
       ev.preventDefault();
+      return;
+    }
+    if (ev.key === 's' && !ev.metaKey && !ev.ctrlKey && !ev.altKey) {
+      speakCurrent();
+      ev.preventDefault();
+      return;
+    }
+    if (ev.key === 'a' && !ev.metaKey && !ev.ctrlKey && !ev.altKey &&
+        settings.ankiEnabled) {
+      addToAnki();
+      ev.preventDefault();
     }
   }
 
@@ -432,6 +535,7 @@
     if (enabled) {
       buildPopup();
       loadSettings();
+      ensureAudio(); // small index + voice probe; safe in every frame
       // preload the dictionary only in the top frame; subframes load lazily
       // on first hover (all_frames would otherwise parse 1.8 MB per iframe)
       if (window === window.top) ensureDict();

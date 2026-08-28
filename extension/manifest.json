@@ -5,6 +5,7 @@
   "description": "Hover over Khmer text to see instant English definitions, romanization, and word frequency. Works fully offline.",
   "minimum_chrome_version": "105",
   "permissions": ["activeTab", "scripting", "storage", "clipboardWrite"],
+  "optional_host_permissions": ["http://127.0.0.1/*", "http://localhost/*"],
   "background": {
     "service_worker": "background.js"
   },
@@ -25,7 +26,12 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["data/dictionary.json", "content/popup.css"],
+      "resources": [
+        "data/dictionary.json",
+        "data/audio-index.json",
+        "data/audio/*",
+        "content/popup.css"
+      ],
       "matches": ["<all_urls>"]
     }
   ],
