@@ -36,8 +36,7 @@
 
 .kl-card .kl-ext,
 .kl-card .kl-save,
-.kl-card .kl-audio,
-.kl-card .kl-anki {
+.kl-card .kl-audio {
   pointer-events: auto;
 }
 
@@ -174,20 +173,6 @@
   cursor: pointer;
 }
 .kl-audio:hover {
-  background: var(--kl-chip-bg);
-}
-
-.kl-anki {
-  background: none;
-  border: 1px solid var(--kl-border);
-  border-radius: 6px;
-  color: var(--kl-accent);
-  font: inherit;
-  font-size: 0.9em;
-  padding: 1px 8px;
-  cursor: pointer;
-}
-.kl-anki:hover {
   background: var(--kl-chip-bg);
 }
 

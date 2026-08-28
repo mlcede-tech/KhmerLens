@@ -67,7 +67,6 @@ function popupState(page) {
       dark: card.classList.contains('kl-dark'),
       keys: q('.kl-keys'),
       audioBtn: !!card.querySelector('.kl-audio'),
-      ankiBtn: !!card.querySelector('.kl-anki'),
       inViewport: rect.left >= 0 && rect.top >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight,
       highlighted: !!(CSS.highlights && CSS.highlights.get('khmerlens')),
     };
@@ -203,7 +202,12 @@ async function partA() {
     }
     check('popup on ខ្មែរ', st.word === 'ខ្មែរ', st.word);
     check('audio button shown for bundled recording', st.audioBtn);
-    check('anki button shown when integration enabled', st.ankiBtn);
+    const hasAnkiButton = await page3.evaluate(() => {
+      const host = document.getElementById('khmerlens-host');
+      const card = host && host.shadowRoot && host.shadowRoot.querySelector('.kl-card');
+      return !!(card && card.querySelector('.kl-anki'));
+    });
+    check('no clickable anki button (add is keyboard-only, "A")', !hasAnkiButton);
     check('keys hint mentions sound and anki',
       !!st.keys && st.keys.includes('S sound') && st.keys.includes('A anki'), st.keys);
 

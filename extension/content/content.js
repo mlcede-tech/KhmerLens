@@ -251,16 +251,7 @@
     ext.rel = 'noopener noreferrer';
     foot.appendChild(ext);
 
-    if (settings.ankiEnabled) {
-      var anki = el('button', 'kl-anki', '★ Anki');
-      anki.type = 'button';
-      anki.title = 'Add this word to your Anki deck (A)';
-      anki.addEventListener('click', function (ev) {
-        ev.stopPropagation();
-        addToAnki();
-      });
-      foot.appendChild(anki);
-    } else {
+    if (!settings.ankiEnabled) {
       // v2 extension point: saved-word list (see docs/DESIGN.md). Disabled
       // affordance kept in the DOM so the layout is ready.
       var save = el('button', 'kl-save', '☆ Save');
