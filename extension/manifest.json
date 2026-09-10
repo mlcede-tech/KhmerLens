@@ -9,6 +9,7 @@
     "service_worker": "background.js"
   },
   "action": {
+    "default_popup": "action/action.html",
     "default_title": "KhmerLens: click to toggle on this tab",
     "default_icon": {
       "16": "icons/icon16.png",

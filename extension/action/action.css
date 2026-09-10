@@ -1,0 +1,75 @@
+body {
+  margin: 0;
+  width: 240px;
+  font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #1f2937;
+  background: #ffffff;
+}
+
+.wrap {
+  padding: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.row span {
+  font-weight: 600;
+}
+
+.hint {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+#blocked {
+  color: #b45309;
+  font-weight: 600;
+}
+
+/* Toggle switch */
+.switch {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: #d1d5db;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.switch::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s ease-in-out;
+}
+
+.switch:checked {
+  background: #b45309;
+}
+
+.switch:checked::before {
+  transform: translateX(18px);
+}
+
+.switch:focus-visible {
+  box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.4);
+}

@@ -41,7 +41,7 @@ function injectInto(tabId) {
 }
 
 async function toggleTab(tab) {
-  if (!tab || !tab.id) return;
+  if (!tab || !tab.id) return { enabled: false, blocked: false };
   var tabId = tab.id;
   var key = String(tabId);
   var s = await getSession();
@@ -67,18 +67,20 @@ async function toggleTab(tab) {
           tabId: tabId,
           title: 'KhmerLens can’t run on this page',
         });
-        return;
+        return { enabled: false, blocked: true };
       }
     } else {
       // already injected (e.g. toggled off then on without navigating)
       sendEnabled(tabId, true);
     }
     updateBadge(tabId, true);
+    return { enabled: true, blocked: false };
   } else {
     delete s.enabledTabs[key];
     await chrome.storage.session.set({ enabledTabs: s.enabledTabs });
     sendEnabled(tabId, false);
     updateBadge(tabId, false);
+    return { enabled: false, blocked: false };
   }
 }
 
@@ -89,8 +91,6 @@ function sendEnabled(tabId, enabled) {
     function () { void chrome.runtime.lastError; }
   );
 }
-
-chrome.action.onClicked.addListener(toggleTab);
 
 chrome.commands.onCommand.addListener(function (command, tab) {
   if (command === 'toggle-khmerlens') toggleTab(tab);
@@ -103,6 +103,15 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       sendResponse({ enabled: !!s.enabledTabs[String(sender.tab.id)] });
     });
     return true; // async response
+  }
+
+  if (msg && msg.type === 'khmerlens:toggle') {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      var tab = tabs && tabs[0];
+      if (!tab) { sendResponse({ enabled: false }); return; }
+      toggleTab(tab).then(function (r) { sendResponse(r || { enabled: false }); });
+    });
+    return true; // async
   }
 });
 
