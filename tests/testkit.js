@@ -70,7 +70,7 @@ async function primePage(page, baseUrl) {
 
 // Load the real content-script bundle and enable it.
 async function enable(page, baseUrl) {
-  var files = ['lib/khmer.js', 'lib/dictionary.js', 'lib/popup.js', 'content/content.js'];
+  var files = ['lib/khmer.js', 'lib/dictionary.js', 'lib/popup.js', 'content/panel.js', 'content/content.js'];
   for (var f of files) {
     await page.addScriptTag({ url: baseUrl + '/extension/' + f });
   }

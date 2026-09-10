@@ -18,6 +18,7 @@ var CONTENT_FILES = [
   'lib/khmer.js',
   'lib/dictionary.js',
   'lib/popup.js',
+  'content/panel.js',
   'content/content.js',
 ];
 

@@ -434,7 +434,10 @@
       loadSettings();
       // preload the dictionary only in the top frame; subframes load lazily
       // on first hover (all_frames would otherwise parse 1.8 MB per iframe)
-      if (window === window.top) ensureDict();
+      if (window === window.top) {
+        ensureDict();
+        try { if (globalThis.KhmerLensPanel) globalThis.KhmerLensPanel.open(); } catch (e) {}
+      }
       document.addEventListener('mousemove', onMouseMove, true);
       document.addEventListener('keydown', onKeyDown, true);
       window.addEventListener('scroll', onScrollOrResize, true);
@@ -447,6 +450,7 @@
       window.removeEventListener('resize', onScrollOrResize);
       document.removeEventListener('mouseleave', hidePopup);
       hidePopup();
+      try { if (globalThis.KhmerLensPanel) globalThis.KhmerLensPanel.close(); } catch (e) {}
     }
   }
 
