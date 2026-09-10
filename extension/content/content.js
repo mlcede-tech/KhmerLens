@@ -324,7 +324,15 @@
 
   function onKeyDown(ev) {
     if (!enabled || !visible || !current) return;
-    if (isEditable(ev.target)) return;
+    // The paste panel's own editable area is contenteditable, so it would
+    // otherwise be caught by the isEditable() guard below and silently eat
+    // all of KhmerLens's shortcuts. Let those through for the panel's own
+    // editable element specifically; any other editable target (a page's
+    // own input, textarea, or contenteditable) still blocks the shortcuts.
+    var panel = globalThis.KhmerLensPanel;
+    var isPanelEditable = !!(panel && panel.getEditableEl &&
+      ev.target === panel.getEditableEl());
+    if (!isPanelEditable && isEditable(ev.target)) return;
 
     if (ev.key === 'Escape') {
       hidePopup();
@@ -436,7 +444,7 @@
       // on first hover (all_frames would otherwise parse 1.8 MB per iframe)
       if (window === window.top) {
         ensureDict();
-        try { if (globalThis.KhmerLensPanel) globalThis.KhmerLensPanel.open(); } catch (e) {}
+        try { if (globalThis.KhmerLensPanel) globalThis.KhmerLensPanel.open(); } catch (e) { console.debug('KhmerLens panel:', e); }
       }
       document.addEventListener('mousemove', onMouseMove, true);
       document.addEventListener('keydown', onKeyDown, true);
@@ -450,7 +458,7 @@
       window.removeEventListener('resize', onScrollOrResize);
       document.removeEventListener('mouseleave', hidePopup);
       hidePopup();
-      try { if (globalThis.KhmerLensPanel) globalThis.KhmerLensPanel.close(); } catch (e) {}
+      try { if (globalThis.KhmerLensPanel) globalThis.KhmerLensPanel.close(); } catch (e) { console.debug('KhmerLens panel:', e); }
     }
   }
 

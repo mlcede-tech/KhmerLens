@@ -98,10 +98,24 @@ chrome.commands.onCommand.addListener(function (command, tab) {
 
 // Content script asks for its tab's state right after injection.
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-  if (msg && msg.type === 'khmerlens:getEnabled' && sender.tab && sender.tab.id) {
-    getSession().then(function (s) {
-      sendResponse({ enabled: !!s.enabledTabs[String(sender.tab.id)] });
-    });
+  if (msg && msg.type === 'khmerlens:getEnabled') {
+    if (sender.tab && sender.tab.id) {
+      // Content-script caller: use its own tab directly.
+      var tabId = sender.tab.id;
+      getSession().then(function (s) {
+        sendResponse({ enabled: !!s.enabledTabs[String(tabId)] });
+      });
+    } else {
+      // Popup caller: no sender.tab (an extension popup isn't a tab), so
+      // resolve the active tab in the current window instead.
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        var tab = tabs && tabs[0];
+        if (!tab || !tab.id) { sendResponse({ enabled: false }); return; }
+        getSession().then(function (s) {
+          sendResponse({ enabled: !!s.enabledTabs[String(tab.id)] });
+        });
+      });
+    }
     return true; // async response
   }
 

@@ -44,7 +44,7 @@ Hover over any Khmer word on any webpage, and a popup appears instantly with:
 
 **Getting Started**
 
-1. Click the toolbar icon to toggle on/off (badge shows "ON" when active)
+1. Click the toolbar icon to open the popup, then flip the switch ON (or press Alt+K, which toggles the tab directly) — badge shows "ON" when active
 2. Hover over any Khmer text
 3. Read the definition in the popup
 4. Use keyboard shortcuts (Shift, c, n, Esc) for faster interaction
@@ -108,7 +108,7 @@ See [Attribution](../ATTRIBUTION.md) for complete source information.
 
 **Purpose:** Read the text on the current page so KhmerLens can detect the Khmer word under the cursor and show its definition.
 
-**Why activeTab (and not broad host access):** KhmerLens requests **no host permissions** and does **not** run on any site automatically. It only gains access to a page when you explicitly activate it — by clicking the toolbar icon or pressing Alt+K on that tab. The access is temporary and is revoked when you navigate away.
+**Why activeTab (and not broad host access):** KhmerLens requests **no host permissions** and does **not** run on any site automatically. It only gains access to a page when you explicitly activate it — by opening the popup and flipping the switch, or pressing Alt+K, on that tab. The access is temporary and is revoked when you navigate away.
 
 **What we do with page content:**
 - Read text only to detect Khmer characters under the cursor
@@ -119,7 +119,7 @@ See [Attribution](../ATTRIBUTION.md) for complete source information.
 
 **Purpose:** Inject the KhmerLens content script into the tab at the moment you activate it (the mechanism that pairs with activeTab).
 
-**When used:** Only after you click the toolbar icon or press Alt+K on a tab. Nothing is injected until then.
+**When used:** Only after you turn KhmerLens on via the popup switch or press Alt+K on a tab. Nothing is injected until then.
 
 ---
 
