@@ -39,6 +39,9 @@
     '  font-family: Arial, sans-serif;' +
     '  color: #1a1a1a;' +
     '}' +
+    '#khmerlens-panel[hidden] {' +
+    '  display: none;' +
+    '}' +
     '#khmerlens-panel * {' +
     '  box-sizing: border-box;' +
     '}' +
