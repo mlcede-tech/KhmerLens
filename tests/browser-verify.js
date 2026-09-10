@@ -202,11 +202,51 @@ async function partB() {
   await ctx.close();
 }
 
+async function partC() {
+  console.log('\n— Part C: paste panel —');
+  const server = await kit.startServer();
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  await kit.primePage(page, server.url);
+  await page.goto(server.url + '/' + PAGES + '/news.html'); // any served page; panel is an overlay
+  await kit.enable(page, server.url);
+
+  const opened = await page.evaluate(() => !!(globalThis.KhmerLensPanel && globalThis.KhmerLensPanel.isOpen()));
+  check('panel opens when enabled', opened);
+
+  // put clean Khmer into the editable (simulates a paste result)
+  const placed = await page.evaluate(() => {
+    const ed = globalThis.KhmerLensPanel.getEditableEl();
+    if (!ed) return false;
+    ed.appendChild(document.createTextNode('ប្រទេសកម្ពុជាមានប្រជាជន'));
+    return true;
+  });
+  check('editable found and filled', placed);
+
+  const pt = await page.evaluate(() => {
+    const ed = globalThis.KhmerLensPanel.getEditableEl();
+    const walker = document.createTreeWalker(ed, NodeFilter.SHOW_TEXT);
+    const node = walker.nextNode();
+    const r = new Range(); r.setStart(node, 2); r.setEnd(node, 3);
+    const rect = r.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  });
+  await page.mouse.move(pt.x, pt.y);
+  await page.waitForTimeout(120);
+  const st = await popupState(page);
+  check('popup appears over pasted panel text', st.visible, st.word);
+  check('popup shows a gloss for pasted text', !!st.gloss, st.gloss && st.gloss.slice(0, 40));
+
+  await browser.close();
+  await server.close();
+}
+
 (async () => {
   console.log('— Part A: content-script integration —');
   await partA();
   console.log('\n— Part B: extension smoke (permission model) —');
   await partB();
+  await partC();
   console.log(failures ? `\n${failures} FAILURES` : '\nAll browser checks passed.');
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
