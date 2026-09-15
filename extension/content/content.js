@@ -251,19 +251,58 @@
     ext.rel = 'noopener noreferrer';
     foot.appendChild(ext);
 
-    if (!settings.ankiEnabled) {
-      // v2 extension point: saved-word list (see docs/DESIGN.md). Disabled
-      // affordance kept in the DOM so the layout is ready.
-      var save = el('button', 'kl-save', '☆ Save');
-      save.disabled = true;
-      save.title = 'Word list coming in v2';
-      foot.appendChild(save);
+    foot.appendChild(el('span', 'kl-status'));
+
+    var actions = el('div', 'kl-actions');
+
+    if (current.matches.length > 1) {
+      var alt = el('button', 'kl-act kl-alt-btn', '⇧ Alt');
+      alt.type = 'button';
+      alt.title = 'Cycle alternate segmentations (Shift)';
+      alt.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        cycleMatch();
+      });
+      actions.appendChild(alt);
     }
 
-    var keys = '⇧ alts · C copy · N next';
-    if (audioMode) keys += ' · S sound';
-    if (settings.ankiEnabled) keys += ' · A anki';
-    foot.appendChild(el('span', 'kl-keys', keys));
+    var copyBtn = el('button', 'kl-act kl-copy', 'C Copy');
+    copyBtn.type = 'button';
+    copyBtn.title = 'Copy word + definition (C)';
+    copyBtn.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      copyCurrent();
+    });
+    actions.appendChild(copyBtn);
+
+    var nextBtn = el('button', 'kl-act kl-next', 'N Next');
+    nextBtn.type = 'button';
+    nextBtn.title = 'Jump to next dictionary word (N)';
+    nextBtn.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      nextWord();
+    });
+    actions.appendChild(nextBtn);
+
+    if (settings.ankiEnabled) {
+      var anki = el('button', 'kl-act kl-anki', 'A Anki');
+      anki.type = 'button';
+      anki.title = 'Add to Anki (A)';
+      anki.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        addToAnki();
+      });
+      actions.appendChild(anki);
+    } else {
+      // v2 extension point: saved-word list (see docs/DESIGN.md). Disabled
+      // affordance kept in the DOM so the layout is ready.
+      var save = el('button', 'kl-act kl-save', '☆ Save');
+      save.disabled = true;
+      save.title = 'Word list coming in v2';
+      actions.appendChild(save);
+    }
+
+    foot.appendChild(actions);
     card.appendChild(foot);
   }
 
@@ -467,17 +506,7 @@
       return;
     }
     if (ev.key === 'Shift' && current.matches.length > 1) {
-      current.index = (current.index + 1) % current.matches.length;
-      var m = current.matches[current.index];
-      try {
-        var wr = new Range();
-        wr.setStart(current.node, m.start);
-        wr.setEnd(current.node, m.end);
-        current.wordRect = wr.getBoundingClientRect();
-      } catch (e) { /* node may be gone */ }
-      renderPopup();
-      showPopupAt(current.cursorX, current.cursorY);
-      setHighlight(current.node, m.start, m.end);
+      cycleMatch();
       ev.preventDefault();
       return;
     }
@@ -501,6 +530,22 @@
       addToAnki();
       ev.preventDefault();
     }
+  }
+
+  /** Cycle to the next alternate segmentation for the current cursor spot. */
+  function cycleMatch() {
+    if (!current || current.matches.length < 2) return;
+    current.index = (current.index + 1) % current.matches.length;
+    var m = current.matches[current.index];
+    try {
+      var wr = new Range();
+      wr.setStart(current.node, m.start);
+      wr.setEnd(current.node, m.end);
+      current.wordRect = wr.getBoundingClientRect();
+    } catch (e) { /* node may be gone */ }
+    renderPopup();
+    showPopupAt(current.cursorX, current.cursorY);
+    setHighlight(current.node, m.start, m.end);
   }
 
   function copyCurrent() {
@@ -539,11 +584,11 @@
 
   function flashFoot(msg) {
     if (!card) return;
-    var keys = card.querySelector('.kl-keys');
-    if (keys) {
-      var old = keys.textContent;
-      keys.textContent = msg;
-      setTimeout(function () { keys.textContent = old; }, 1200);
+    var status = card.querySelector('.kl-status');
+    if (status) {
+      var old = status.textContent;
+      status.textContent = msg;
+      setTimeout(function () { status.textContent = old; }, 1200);
     }
   }
 
