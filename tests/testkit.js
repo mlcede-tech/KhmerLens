@@ -49,7 +49,14 @@ async function primePage(page, baseUrl) {
       runtime: {
         lastError: null,
         getURL: function (p) { return base + '/extension/' + p; },
-        sendMessage: function (msg, cb) { if (cb) cb({ enabled: false }); },
+        sendMessage: function (msg, cb) {
+          if (msg && msg.type === 'khmerlens:ankiAdd') {
+            window.__ankiAdds = (window.__ankiAdds || []).concat(msg.entry);
+            if (cb) cb({ ok: true });
+            return;
+          }
+          if (cb) cb({ enabled: false });
+        },
         onMessage: { addListener: function () {} },
       },
       storage: {
@@ -70,7 +77,7 @@ async function primePage(page, baseUrl) {
 
 // Load the real content-script bundle and enable it.
 async function enable(page, baseUrl) {
-  var files = ['lib/khmer.js', 'lib/dictionary.js', 'lib/popup.js', 'content/content.js'];
+  var files = ['lib/khmer.js', 'lib/dictionary.js', 'lib/popup.js', 'lib/audio.js', 'lib/anki.js', 'content/content.js'];
   for (var f of files) {
     await page.addScriptTag({ url: baseUrl + '/extension/' + f });
   }

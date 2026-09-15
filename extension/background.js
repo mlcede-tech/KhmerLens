@@ -14,12 +14,52 @@
  */
 'use strict';
 
+importScripts('lib/anki.js');
+
 var CONTENT_FILES = [
   'lib/khmer.js',
   'lib/dictionary.js',
   'lib/popup.js',
+  'lib/audio.js',
+  'lib/anki.js',
   'content/content.js',
 ];
+
+var ANKI_DEFAULTS = {
+  ankiEnabled: false,
+  ankiUrl: 'http://127.0.0.1:8765',
+  ankiDeck: '',
+  ankiModel: '',
+  ankiFieldMap: {},
+  ankiTags: 'khmerlens',
+};
+
+/**
+ * Add the hovered word to the user's Anki deck via AnkiConnect.
+ * Runs here because content scripts can't reach 127.0.0.1 (page CSP/CORS);
+ * the extension's optional host permission applies to worker fetches.
+ */
+async function ankiAdd(entry) {
+  var settings = await chrome.storage.sync.get(ANKI_DEFAULTS);
+  if (!settings.ankiEnabled) return { ok: false, status: 'disabled' };
+  var invalid = KhmerLensAnki.validateSettings(settings);
+  if (invalid) return { ok: false, status: 'unconfigured', message: invalid };
+
+  try {
+    var resp = await fetch(settings.ankiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(KhmerLensAnki.buildAddNote(settings, entry)),
+    });
+    var data = await resp.json();
+    if (data.error) {
+      return { ok: false, status: KhmerLensAnki.classifyError(data.error), message: data.error };
+    }
+    return { ok: true, noteId: data.result };
+  } catch (e) {
+    return { ok: false, status: KhmerLensAnki.classifyError(e && e.message), message: String(e) };
+  }
+}
 
 function getSession() {
   return chrome.storage.session.get({ enabledTabs: {}, injectedTabs: {} });
@@ -101,6 +141,10 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     getSession().then(function (s) {
       sendResponse({ enabled: !!s.enabledTabs[String(sender.tab.id)] });
     });
+    return true; // async response
+  }
+  if (msg && msg.type === 'khmerlens:ankiAdd' && msg.entry) {
+    ankiAdd(msg.entry).then(sendResponse);
     return true; // async response
   }
 });

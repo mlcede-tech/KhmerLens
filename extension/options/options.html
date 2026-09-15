@@ -86,6 +86,64 @@
       </div>
     </section>
 
+    <!-- Anki integration -->
+    <section class="ref" id="anki-section">
+      <h2>Anki integration</h2>
+      <div class="field field-row">
+        <div>
+          <label class="field-label" for="ankiEnabled">Add words to Anki</label>
+          <p class="field-help">Shows a ★ Anki button in the popup (shortcut <kbd>A</kbd>). Requires the Anki desktop app running with the <a href="https://ankiweb.net/shared/info/2055492159" target="_blank" rel="noopener">AnkiConnect</a> add-on.</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="ankiEnabled">
+          <span class="track" aria-hidden="true"><span class="knob"></span></span>
+        </label>
+      </div>
+
+      <div id="anki-config" hidden>
+        <div class="field">
+          <label class="field-label" for="ankiUrl">AnkiConnect address</label>
+          <div class="anki-row">
+            <input type="text" id="ankiUrl" spellcheck="false">
+            <button type="button" class="anki-btn" id="anki-connect">Connect</button>
+          </div>
+          <p class="field-help anki-status" id="anki-status" role="status"></p>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="ankiDeck">Deck</label>
+          <select id="ankiDeck" disabled></select>
+          <p class="field-help">Words are added as new notes to this existing deck.</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="ankiModel">Note type</label>
+          <select id="ankiModel" disabled></select>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Field mapping</span>
+          <div id="anki-fields" class="anki-fields"></div>
+          <p class="field-help">Choose what KhmerLens writes into each field of the note type.</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="ankiTags">Tags</label>
+          <input type="text" id="ankiTags" spellcheck="false">
+          <p class="field-help">Space- or comma-separated tags added to every note.</p>
+        </div>
+
+        <details class="anki-help">
+          <summary>Connection troubleshooting</summary>
+          <ol class="steps">
+            <li>In Anki: Tools → Add-ons → Get Add-ons → code <code>2055492159</code>, then restart Anki.</li>
+            <li>If connecting still fails, open Tools → Add-ons → AnkiConnect → Config and add this extension's origin to <code>webCorsOriginList</code>: <code id="anki-origin"></code></li>
+            <li>Keep Anki open while adding words.</li>
+          </ol>
+        </details>
+      </div>
+    </section>
+
     <!-- Reference -->
     <section class="ref">
       <h2>Getting started</h2>
@@ -100,6 +158,8 @@
         <div><dt><kbd>Shift</kbd></dt><dd>Cycle to shorter / alternative matches</dd></div>
         <div><dt><kbd>C</kbd></dt><dd>Copy the word and definition</dd></div>
         <div><dt><kbd>N</kbd></dt><dd>Jump to the next word</dd></div>
+        <div><dt><kbd>S</kbd></dt><dd>Play pronunciation <span class="dd-note">(bundled recording, or the system's Khmer voice if installed)</span></dd></div>
+        <div><dt><kbd>A</kbd></dt><dd>Add the word to Anki <span class="dd-note">(when Anki integration is enabled)</span></dd></div>
         <div><dt><kbd>Esc</kbd></dt><dd>Hide the popup</dd></div>
       </dl>
     </section>
@@ -110,10 +170,12 @@
       <ul class="sources">
         <li><a href="https://kaikki.org/dictionary/Khmer/" target="_blank" rel="noopener">Wiktionary, via kaikki.org</a> — CC BY-SA 4.0. The bundled dictionary is likewise available under CC BY-SA 4.0.</li>
         <li><a href="https://github.com/silnrsi/khmerlbdict" target="_blank" rel="noopener">SIL khmerlbdict</a> frequency wordlist — MIT License, © 2015 SIL NRSI.</li>
+        <li>Pronunciation recordings from <a href="https://commons.wikimedia.org/wiki/Category:Khmer_pronunciation" target="_blank" rel="noopener">Wikimedia Commons</a> and <a href="https://lingualibre.org/" target="_blank" rel="noopener">Lingua Libre</a> contributors — CC BY-SA 4.0 (per-file credits in ATTRIBUTION.md).</li>
       </ul>
       <p class="colophon">Inspired by the <a href="https://github.com/cschiller/zhongwen" target="_blank" rel="noopener">Zhongwen</a> popup dictionary for Chinese.</p>
     </section>
   </main>
+  <script src="../lib/anki.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

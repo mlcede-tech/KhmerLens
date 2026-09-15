@@ -11,8 +11,10 @@ KhmerLens solves the problem of reading Khmer text on the web without breaking y
 - Part of speech (noun, verb, adjective, etc.)
 - English definitions
 - Frequency badge (common / frequent, based on the SIL frequency list)
+- Pronunciation audio where available (bundled native recordings, or the system's Khmer text-to-speech voice)
+- Optional one-key export of the word into an existing Anki deck (via the local AnkiConnect add-on)
 
-The extension works fully offline with no data collection. All lookups are performed locally using a compiled dictionary of 21,514 Khmer words.
+The extension works fully offline with no data collection. All lookups are performed locally using a compiled dictionary of 21,514 Khmer words. The optional Anki integration talks only to the Anki app running on your own machine.
 
 ## Installation
 
@@ -55,6 +57,8 @@ KhmerLens uses Chrome's `activeTab` model: it requests no host permissions and o
 | **Shift** | Cycle to next/shorter match (while popup open) |
 | **c** | Copy word + definition to clipboard |
 | **n** | Jump to next Khmer word on page |
+| **s** | Play pronunciation (bundled recording, or system Khmer voice if installed) |
+| **a** | Add the word to Anki (when Anki integration is enabled) |
 | **Esc** | Hide popup |
 
 ## Options
@@ -65,6 +69,22 @@ Access settings by right-clicking the extension icon → **Options**:
 - **Font Size:** Adjust popup text size
 - **Romanization:** Show/hide romanization (Wiktionary phonetic scheme)
 - **On-page Highlight:** Highlight Khmer text when hovering
+- **Anki integration:** Enable/disable, AnkiConnect address, target deck, note type, per-field mapping (word / romanization / definition / part of speech), and tags
+
+### Audio pronunciation
+
+The popup shows a 🔊 button when audio is available for the hovered word:
+
+- **Bundled recordings** — freely licensed (CC BY-SA 4.0) native-speaker recordings from Wikimedia Commons and Lingua Libre, shipped inside the extension (works offline). Coverage is currently small (17 words) because few free Khmer recordings exist; rerun `data-pipeline/fetch_audio.py` to pick up new ones.
+- **System Khmer voice** — if your OS provides a Khmer text-to-speech voice, every word becomes speakable via the same button.
+
+### Anki integration
+
+Adds the hovered word to an existing deck in the Anki desktop app, using the [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on's local API (`http://127.0.0.1:8765` — nothing leaves your machine):
+
+1. In Anki: Tools → Add-ons → Get Add-ons → code `2055492159`, restart Anki.
+2. In KhmerLens options: enable **Add words to Anki** (Chrome asks once for permission to reach `127.0.0.1`), click **Connect**, then pick your deck, note type, and how fields are filled.
+3. Hover a word and press **A** (or click ★ Anki). Duplicates within the deck are detected and skipped.
 
 ## Dictionary
 
