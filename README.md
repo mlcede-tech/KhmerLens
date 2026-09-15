@@ -24,7 +24,7 @@ The extension works fully offline with no data collection. All lookups are perfo
 2. Enable **Developer mode** (toggle in the top-right corner)
 3. Click **Load unpacked**
 4. Select the `extension/` folder from your KhmerLens project
-5. Click the toolbar icon to toggle the extension ON/OFF per tab (badge shows "ON" when active)
+5. Click the toolbar icon to open the popup, then flip the switch to turn KhmerLens ON/OFF for the current tab (badge shows "ON" when active)
 
 **Requirements:** Chrome 105 or later
 
@@ -42,12 +42,26 @@ Follow the "Quick Load" steps above, using the cloned `extension/` folder.
 
 ### Basic Usage
 
-1. Click the toolbar icon (or press Alt+K) to activate KhmerLens on the current tab — the badge shows "ON"
+1. Click the toolbar icon to open the popup, then flip the switch ON (or press Alt+K, which toggles the tab directly) to activate KhmerLens on the current tab — the badge shows "ON"
 2. Hover over any Khmer text on the page
 3. A popup appears with the word, definitions, and metadata
 4. Move the cursor away or press Esc to dismiss
 
-KhmerLens uses Chrome's `activeTab` model: it requests no host permissions and only reads a page after you activate it there. Because that access ends when you navigate, KhmerLens turns off on the new page — click the icon (or Alt+K) again to re-activate.
+KhmerLens uses Chrome's `activeTab` model: it requests no host permissions and only reads a page after you activate it there. Because that access ends when you navigate, KhmerLens turns off on the new page — open the popup and flip the switch (or press Alt+K) again to re-activate.
+
+### Paste Panel
+
+For text that KhmerLens can't read in place (such as Google Docs, PDFs, or canvas-based editors), use the paste panel:
+
+1. Click the toolbar icon → a popup appears with a labeled **ON/OFF toggle**
+2. Click the toggle to turn KhmerLens **ON** — this enables hover-translation AND opens a small paste panel in the top-right corner of the page
+3. Paste Khmer text into the panel (Ctrl+V / Cmd+V)
+4. Hover over any word in the panel to see its definition
+5. Click the toggle to turn KhmerLens **OFF** — this disables the lens and closes the panel
+
+The panel automatically converts pasted content to plain text, so formatting from sources like Google Docs won't interfere with word matching.
+
+**Known v1 limitations:** The panel is fixed to the right edge (not draggable or resizable). Scrolling inside the panel temporarily hides any open definition popup until the next hover.
 
 ### Keyboard Shortcuts
 

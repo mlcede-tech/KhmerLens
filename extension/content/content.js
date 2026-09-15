@@ -416,7 +416,15 @@
 
   function onKeyDown(ev) {
     if (!enabled || !visible || !current) return;
-    if (isEditable(ev.target)) return;
+    // The paste panel's own editable area is contenteditable, so it would
+    // otherwise be caught by the isEditable() guard below and silently eat
+    // all of KhmerLens's shortcuts. Let those through for the panel's own
+    // editable element specifically; any other editable target (a page's
+    // own input, textarea, or contenteditable) still blocks the shortcuts.
+    var panel = globalThis.KhmerLensPanel;
+    var isPanelEditable = !!(panel && panel.getEditableEl &&
+      ev.target === panel.getEditableEl());
+    if (!isPanelEditable && isEditable(ev.target)) return;
 
     if (ev.key === 'Escape') {
       hidePopup();
@@ -538,7 +546,10 @@
       ensureAudio(); // small index + voice probe; safe in every frame
       // preload the dictionary only in the top frame; subframes load lazily
       // on first hover (all_frames would otherwise parse 1.8 MB per iframe)
-      if (window === window.top) ensureDict();
+      if (window === window.top) {
+        ensureDict();
+        try { if (globalThis.KhmerLensPanel) globalThis.KhmerLensPanel.open(); } catch (e) { console.debug('KhmerLens panel:', e); }
+      }
       document.addEventListener('mousemove', onMouseMove, true);
       document.addEventListener('keydown', onKeyDown, true);
       window.addEventListener('scroll', onScrollOrResize, true);
@@ -551,12 +562,20 @@
       window.removeEventListener('resize', onScrollOrResize);
       document.removeEventListener('mouseleave', hidePopup);
       hidePopup();
+      try { if (globalThis.KhmerLensPanel) globalThis.KhmerLensPanel.close(); } catch (e) { console.debug('KhmerLens panel:', e); }
     }
   }
 
-  chrome.runtime.onMessage.addListener(function (msg) {
+  chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     if (msg && msg.type === 'khmerlens:setEnabled') {
       setEnabled(!!msg.enabled);
+      return;
+    }
+    if (msg && (msg.type === 'khmerlens:togglePanel' || msg.type === 'khmerlens:getPanelOpen')) {
+      var panel = globalThis.KhmerLensPanel;
+      if (panel && msg.type === 'khmerlens:togglePanel') panel.toggle();
+      sendResponse({ open: !!(panel && panel.isOpen()) });
+      return;
     }
   });
 
