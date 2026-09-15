@@ -19,6 +19,32 @@ KhmerLens uses data and libraries from multiple open-source projects. This docum
 **Attribution:** SIL International, https://www.sil.org/  
 **What was used:** Khmer frequency list (`seafreq.txt`) containing word tokens for segmentation support, without English definitions.
 
+### Pronunciation Recordings (17 words)
+
+**Sources:** [Wikimedia Commons — Category:Khmer pronunciation](https://commons.wikimedia.org/wiki/Category:Khmer_pronunciation) and [Lingua Libre](https://lingualibre.org/) (recordings hosted on Wikimedia Commons)
+**License:** Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+**What was used:** Native-speaker recordings of Khmer words, bundled in `extension/data/audio/` and indexed by `extension/data/audio-index.json` (rebuilt with `data-pipeline/fetch_audio.py`).
+
+| Word | Bundled file | Original file | Author | License |
+|------|--------------|---------------|--------|---------|
+| កាហ្វេ | `698cb4253c8c.wav` | [LL-Q9205 (khm)-咽頭べさ-កាហ្វេ.wav](https://commons.wikimedia.org/wiki/File:LL-Q9205_(khm)-%E5%92%BD%E9%A0%AD%E3%81%B9%E3%81%95-%E1%9E%80%E1%9E%B6%E1%9E%A0%E1%9F%92%E1%9E%9C%E1%9F%81.wav) | Speaker: 咽頭べさ; Recorder: 咽頭べさ | CC BY-SA 4.0 |
+| កាហ្វេទឹកកក | `4eecfc149e9b.wav` | [LL-Q9205 (khm)-咽頭べさ-កាហ្វេទឹកកក.wav](https://commons.wikimedia.org/wiki/File:LL-Q9205_(khm)-%E5%92%BD%E9%A0%AD%E3%81%B9%E3%81%95-%E1%9E%80%E1%9E%B6%E1%9E%A0%E1%9F%92%E1%9E%9C%E1%9F%81%E1%9E%91%E1%9E%B9%E1%9E%80%E1%9E%80%E1%9E%80.wav) | Speaker: 咽頭べさ; Recorder: 咽頭べさ | CC BY-SA 4.0 |
+| កាំភ្លើង | `ebe72c5bd55e.wav` | [LL-Q9205 (khm)-咽頭べさ-កាំភ្លើង.wav](https://commons.wikimedia.org/wiki/File:LL-Q9205_(khm)-%E5%92%BD%E9%A0%AD%E3%81%B9%E3%81%95-%E1%9E%80%E1%9E%B6%E1%9F%86%E1%9E%97%E1%9F%92%E1%9E%9B%E1%9E%BE%E1%9E%84.wav) | Speaker: 咽頭べさ; Recorder: 咽頭べさ | CC BY-SA 4.0 |
+| កាំភ្លើងធំ | `6b8d22b7a626.wav` | [LL-Q9205 (khm)-咽頭べさ-កាំភ្លើងធំ.wav](https://commons.wikimedia.org/wiki/File:LL-Q9205_(khm)-%E5%92%BD%E9%A0%AD%E3%81%B9%E3%81%95-%E1%9E%80%E1%9E%B6%E1%9F%86%E1%9E%97%E1%9F%92%E1%9E%9B%E1%9E%BE%E1%9E%84%E1%9E%92%E1%9F%86.wav) | Speaker: 咽頭べさ; Recorder: 咽頭べさ | CC BY-SA 4.0 |
+| កាំភ្លើងមេរៀម | `69a4c80aaf0c.wav` | [LL-Q9205 (khm)-咽頭べさ-កាំភ្លើងមេរៀម.wav](https://commons.wikimedia.org/wiki/File:LL-Q9205_(khm)-%E5%92%BD%E9%A0%AD%E3%81%B9%E3%81%95-%E1%9E%80%E1%9E%B6%E1%9F%86%E1%9E%97%E1%9F%92%E1%9E%9B%E1%9E%BE%E1%9E%84%E1%9E%98%E1%9F%81%E1%9E%9A%E1%9F%80%E1%9E%98.wav) | Speaker: 咽頭べさ; Recorder: 咽頭べさ | CC BY-SA 4.0 |
+| កំប្រុក | `77935b474176.wav` | [LL-Q9205 (khm)-咽頭べさ-កំប្រុក.wav](https://commons.wikimedia.org/wiki/File:LL-Q9205_(khm)-%E5%92%BD%E9%A0%AD%E3%81%B9%E3%81%95-%E1%9E%80%E1%9F%86%E1%9E%94%E1%9F%92%E1%9E%9A%E1%9E%BB%E1%9E%80.wav) | Speaker: 咽頭べさ; Recorder: 咽頭べさ | CC BY-SA 4.0 |
+| ក្ដាម | `ef26a845ed7a.wav` | [LL-Q9205 (khm)-咽頭べさ-ក្ដាម.wav](https://commons.wikimedia.org/wiki/File:LL-Q9205_(khm)-%E5%92%BD%E9%A0%AD%E3%81%B9%E3%81%95-%E1%9E%80%E1%9F%92%E1%9E%8A%E1%9E%B6%E1%9E%98.wav) | Speaker: 咽頭べさ; Recorder: 咽頭べさ | CC BY-SA 4.0 |
+| ខ្ញែរសមុទ្រ | `5f389825e2d6.wav` | [LL-Q9205 (khm)-Intobesa (咽頭べさ)-ខ្ញែរសមុទ្រ.wav](https://commons.wikimedia.org/wiki/File:LL-Q9205_(khm)-Intobesa_(%E5%92%BD%E9%A0%AD%E3%81%B9%E3%81%95)-%E1%9E%81%E1%9F%92%E1%9E%89%E1%9F%82%E1%9E%9A%E1%9E%9F%E1%9E%98%E1%9E%BB%E1%9E%91%E1%9F%92%E1%9E%9A.wav) | Speaker: Intobesa; Recorder: 咽頭べさ | CC BY-SA 4.0 |
+| ខ្មែរ | `819855d5513f.ogg` | [Km-ខ្មែរ.ogg](https://commons.wikimedia.org/wiki/File:Km-%E1%9E%81%E1%9F%92%E1%9E%98%E1%9F%82%E1%9E%9A.ogg) | Trezoo | CC BY-SA 4.0 |
+| ជំពុលទឹក | `52ae155a4f20.wav` | [LL-Q9205 (khm)-Intobesa (咽頭べさ)-ជំពុលទឹក.wav](https://commons.wikimedia.org/wiki/File:LL-Q9205_(khm)-Intobesa_(%E5%92%BD%E9%A0%AD%E3%81%B9%E3%81%95)-%E1%9E%87%E1%9F%86%E1%9E%96%E1%9E%BB%E1%9E%9B%E1%9E%91%E1%9E%B9%E1%9E%80.wav) | Speaker: Intobesa; Recorder: 咽頭べさ | CC BY-SA 4.0 |
+| ដើរ | `7ef9ad753c9d.wav` | [LL-Q9205 (khm)-Intobesa (咽頭べさ)-ដើរ.wav](https://commons.wikimedia.org/wiki/File:LL-Q9205_(khm)-Intobesa_(%E5%92%BD%E9%A0%AD%E3%81%B9%E3%81%95)-%E1%9E%8A%E1%9E%BE%E1%9E%9A.wav) | Speaker: Intobesa; Recorder: 咽頭べさ | CC BY-SA 4.0 |
+| ដែរ | `9a9b73929a0b.wav` | [LL-Q9205 (khm)-Intobesa (咽頭べさ)-ដែរ.wav](https://commons.wikimedia.org/wiki/File:LL-Q9205_(khm)-Intobesa_(%E5%92%BD%E9%A0%AD%E3%81%B9%E3%81%95)-%E1%9E%8A%E1%9F%82%E1%9E%9A.wav) | Speaker: Intobesa; Recorder: 咽頭べさ | CC BY-SA 4.0 |
+| ធ្មេញ | `6aad45f07f64.wav` | [LL-Q9205 (khm)-咽頭べさ-ធ្មេញ.wav](https://commons.wikimedia.org/wiki/File:LL-Q9205_(khm)-%E5%92%BD%E9%A0%AD%E3%81%B9%E3%81%95-%E1%9E%92%E1%9F%92%E1%9E%98%E1%9F%81%E1%9E%89.wav) | Speaker: 咽頭べさ; Recorder: 咽頭べさ | CC BY-SA 4.0 |
+| បរទេស | `ab645a545a86.ogg` | [Km-បរទេស.ogg](https://commons.wikimedia.org/wiki/File:Km-%E1%9E%94%E1%9E%9A%E1%9E%91%E1%9F%81%E1%9E%9F.ogg) | Nisetpdajsankha | CC BY-SA 4.0 |
+| ពញា | `4884c5d08ae4.ogg` | [Km-ពញា.ogg](https://commons.wikimedia.org/wiki/File:Km-%E1%9E%96%E1%9E%89%E1%9E%B6.ogg) | Nisetpdajsankha | CC BY-SA 4.0 |
+| ពាក្យ | `9b699804f8d8.ogg` | [Km-ពាក្យ.ogg](https://commons.wikimedia.org/wiki/File:Km-%E1%9E%96%E1%9E%B6%E1%9E%80%E1%9F%92%E1%9E%99.ogg) | Trezoo | CC BY-SA 4.0 |
+| សុខ | `eb36696ba317.wav` | [LL-Q9205 (khm)-咽頭べさ-សុខ.wav](https://commons.wikimedia.org/wiki/File:LL-Q9205_(khm)-%E5%92%BD%E9%A0%AD%E3%81%B9%E3%81%95-%E1%9E%9F%E1%9E%BB%E1%9E%81.wav) | Speaker: 咽頭べさ; Recorder: 咽頭べさ | CC BY-SA 4.0 |
+
 ---
 
 ## Compiled Dictionary
