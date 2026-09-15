@@ -65,8 +65,10 @@ function popupState(page) {
       word: q('.kl-word'), roman: q('.kl-roman'),
       gloss: q('.kl-gloss') || q('.kl-nogloss'), alt: q('.kl-alt'),
       dark: card.classList.contains('kl-dark'),
-      keys: q('.kl-keys'),
+      status: q('.kl-status'),
       audioBtn: !!card.querySelector('.kl-audio'),
+      copyBtn: !!card.querySelector('.kl-copy'),
+      nextBtn: !!card.querySelector('.kl-next'),
       inViewport: rect.left >= 0 && rect.top >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight,
       highlighted: !!(CSS.highlights && CSS.highlights.get('khmerlens')),
     };
@@ -202,24 +204,50 @@ async function partA() {
     }
     check('popup on ខ្មែរ', st.word === 'ខ្មែរ', st.word);
     check('audio button shown for bundled recording', st.audioBtn);
+    check('copy button rendered', st.copyBtn);
+    check('next button rendered', st.nextBtn);
     const hasAnkiButton = await page3.evaluate(() => {
       const host = document.getElementById('khmerlens-host');
       const card = host && host.shadowRoot && host.shadowRoot.querySelector('.kl-card');
       return !!(card && card.querySelector('.kl-anki'));
     });
-    check('no clickable anki button (add is keyboard-only, "A")', !hasAnkiButton);
-    check('keys hint mentions sound and anki',
-      !!st.keys && st.keys.includes('S sound') && st.keys.includes('A anki'), st.keys);
+    check('clickable anki button rendered when Anki is enabled', hasAnkiButton);
 
+    // keyboard shortcut still works
     await page3.keyboard.press('a');
     await page3.waitForTimeout(200);
-    const added = await page3.evaluate(() => window.__ankiAdds || []);
+    let added = await page3.evaluate(() => window.__ankiAdds || []);
     check('A sends the word to the anki bridge',
       added.length === 1 && added[0].word === 'ខ្មែរ' && added[0].senses.length > 0,
       JSON.stringify(added).slice(0, 80));
     check('foot flashes anki confirmation',
-      (await popupState(page3)).keys === 'Added to Anki ✓',
-      (await popupState(page3)).keys);
+      (await popupState(page3)).status === 'Added to Anki ✓',
+      (await popupState(page3)).status);
+    await page3.waitForTimeout(1300); // let the flash message clear
+
+    // clicking the button does the same thing
+    await page3.click('.kl-anki');
+    await page3.waitForTimeout(200);
+    added = await page3.evaluate(() => window.__ankiAdds || []);
+    check('clicking Anki button sends the word to the anki bridge',
+      added.length === 2 && added[1].word === 'ខ្មែរ',
+      JSON.stringify(added).slice(0, 120));
+
+    // copy and next buttons are clickable too
+    await page3.click('.kl-copy');
+    await page3.waitForTimeout(200);
+    check('foot flashes copy confirmation',
+      (await popupState(page3)).status === 'Copied ✓',
+      (await popupState(page3)).status);
+    await page3.waitForTimeout(1300);
+
+    const wordBeforeNextClick = (await popupState(page3)).word;
+    await page3.click('.kl-next');
+    await page3.waitForTimeout(200);
+    check('clicking Next moves to another word',
+      (await popupState(page3)).visible && (await popupState(page3)).word !== wordBeforeNextClick,
+      (await popupState(page3)).word);
+
     await page3.screenshot({ path: path.join(SHOTS, '05-audio-anki.png') });
   }
 

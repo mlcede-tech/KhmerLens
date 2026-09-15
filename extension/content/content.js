@@ -251,19 +251,58 @@
     ext.rel = 'noopener noreferrer';
     foot.appendChild(ext);
 
-    if (!settings.ankiEnabled) {
-      // v2 extension point: saved-word list (see docs/DESIGN.md). Disabled
-      // affordance kept in the DOM so the layout is ready.
-      var save = el('button', 'kl-save', '☆ Save');
-      save.disabled = true;
-      save.title = 'Word list coming in v2';
-      foot.appendChild(save);
+    foot.appendChild(el('span', 'kl-status'));
+
+    var actions = el('div', 'kl-actions');
+
+    if (current.matches.length > 1) {
+      var alt = el('button', 'kl-act kl-alt-btn', '⇧ Alt');
+      alt.type = 'button';
+      alt.title = 'Cycle alternate segmentations (Shift)';
+      alt.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        cycleMatch();
+      });
+      actions.appendChild(alt);
     }
 
-    var keys = '⇧ alts · C copy · N next';
-    if (audioMode) keys += ' · S sound';
-    if (settings.ankiEnabled) keys += ' · A anki';
-    foot.appendChild(el('span', 'kl-keys', keys));
+    var copyBtn = el('button', 'kl-act kl-copy', 'C Copy');
+    copyBtn.type = 'button';
+    copyBtn.title = 'Copy word + definition (C)';
+    copyBtn.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      copyCurrent();
+    });
+    actions.appendChild(copyBtn);
+
+    var nextBtn = el('button', 'kl-act kl-next', 'N Next');
+    nextBtn.type = 'button';
+    nextBtn.title = 'Jump to next dictionary word (N)';
+    nextBtn.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      nextWord();
+    });
+    actions.appendChild(nextBtn);
+
+    if (settings.ankiEnabled) {
+      var anki = el('button', 'kl-act kl-anki', 'A Anki');
+      anki.type = 'button';
+      anki.title = 'Add to Anki (A)';
+      anki.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        addToAnki();
+      });
+      actions.appendChild(anki);
+    } else {
+      // v2 extension point: saved-word list (see docs/DESIGN.md). Disabled
+      // affordance kept in the DOM so the layout is ready.
+      var save = el('button', 'kl-act kl-save', '☆ Save');
+      save.disabled = true;
+      save.title = 'Word list coming in v2';
+      actions.appendChild(save);
+    }
+
+    foot.appendChild(actions);
     card.appendChild(foot);
   }
 
@@ -281,6 +320,27 @@
     card.style.left = pos.left + 'px';
     card.style.top = pos.top + 'px';
     visible = true;
+    if (current) {
+      current.popupRect = {
+        left: pos.left, top: pos.top,
+        right: pos.left + rect.width, bottom: pos.top + rect.height,
+      };
+    }
+  }
+
+  // Bounding box enclosing both the hovered word and the open popup, plus a
+  // small margin. While the cursor is inside it we leave the popup alone —
+  // otherwise every mousemove on the way from the word to e.g. the kheng.info
+  // link re-runs the lookup, and since the popup is re-positioned relative to
+  // wherever the cursor now is, it keeps hopping just out of reach.
+  function inSafeZone(x, y) {
+    if (!current || !current.wordRect || !current.popupRect) return false;
+    var a = current.wordRect, b = current.popupRect, m = 12;
+    var left = Math.min(a.left, b.left) - m;
+    var top = Math.min(a.top, b.top) - m;
+    var right = Math.max(a.right, b.right) + m;
+    var bottom = Math.max(a.bottom, b.bottom) + m;
+    return x >= left && x <= right && y >= top && y <= bottom;
   }
 
   function hidePopup() {
@@ -382,7 +442,18 @@
       return;
     }
 
-    current = { matches: matches, index: 0, node: caret.node, cursorX: x, cursorY: y };
+    var wordRect = null;
+    try {
+      var wr = new Range();
+      wr.setStart(caret.node, m0.start);
+      wr.setEnd(caret.node, m0.end);
+      wordRect = wr.getBoundingClientRect();
+    } catch (e) { /* node may be gone */ }
+
+    current = {
+      matches: matches, index: 0, node: caret.node, cursorX: x, cursorY: y,
+      wordRect: wordRect, popupRect: null,
+    };
     renderPopup();
     showPopupAt(x, y);
     setHighlight(caret.node, m0.start, m0.end);
@@ -394,6 +465,10 @@
     // ignore moves over our own popup (e.g. reaching for the kheng.info
     // link) so the popup doesn't hide or re-render underneath the cursor
     if (host && (ev.target === host || host.contains(ev.target))) return;
+    // also ignore moves in the gap between the hovered word and the popup —
+    // otherwise the cursor's path there keeps re-triggering lookups that
+    // reposition (or hide) the popup before it can be reached
+    if (visible && inSafeZone(ev.clientX, ev.clientY)) return;
     lastMouse.x = ev.clientX;
     lastMouse.y = ev.clientY;
     if (hoverTimer) clearTimeout(hoverTimer);
@@ -431,11 +506,7 @@
       return;
     }
     if (ev.key === 'Shift' && current.matches.length > 1) {
-      current.index = (current.index + 1) % current.matches.length;
-      var m = current.matches[current.index];
-      renderPopup();
-      showPopupAt(current.cursorX, current.cursorY);
-      setHighlight(current.node, m.start, m.end);
+      cycleMatch();
       ev.preventDefault();
       return;
     }
@@ -459,6 +530,22 @@
       addToAnki();
       ev.preventDefault();
     }
+  }
+
+  /** Cycle to the next alternate segmentation for the current cursor spot. */
+  function cycleMatch() {
+    if (!current || current.matches.length < 2) return;
+    current.index = (current.index + 1) % current.matches.length;
+    var m = current.matches[current.index];
+    try {
+      var wr = new Range();
+      wr.setStart(current.node, m.start);
+      wr.setEnd(current.node, m.end);
+      current.wordRect = wr.getBoundingClientRect();
+    } catch (e) { /* node may be gone */ }
+    renderPopup();
+    showPopupAt(current.cursorX, current.cursorY);
+    setHighlight(current.node, m.start, m.end);
   }
 
   function copyCurrent() {
@@ -497,11 +584,11 @@
 
   function flashFoot(msg) {
     if (!card) return;
-    var keys = card.querySelector('.kl-keys');
-    if (keys) {
-      var old = keys.textContent;
-      keys.textContent = msg;
-      setTimeout(function () { keys.textContent = old; }, 1200);
+    var status = card.querySelector('.kl-status');
+    if (status) {
+      var old = status.textContent;
+      status.textContent = msg;
+      setTimeout(function () { status.textContent = old; }, 1200);
     }
   }
 
@@ -521,6 +608,7 @@
           current = {
             matches: matches, index: 0, node: node,
             cursorX: r.left, cursorY: r.bottom,
+            wordRect: r, popupRect: null,
           };
           renderPopup();
           showPopupAt(r.left, r.bottom);
