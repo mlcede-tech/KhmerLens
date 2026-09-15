@@ -241,12 +241,105 @@ async function partC() {
   await server.close();
 }
 
+async function partD() {
+  console.log('\n— Part D: independent paste-panel toggle —');
+  const server = await kit.startServer();
+  const browser = await chromium.launch();
+
+  // D1: content.js's khmerlens:togglePanel / khmerlens:getPanelOpen handling,
+  // driven the way the background worker's chrome.tabs.sendMessage would.
+  // testkit's onMessage.addListener is a no-op stub, so capture the real
+  // listener here instead of invoking it.
+  const page = await browser.newPage();
+  await kit.primePage(page, server.url);
+  await page.addInitScript(() => {
+    window.__listeners = [];
+    window.chrome.runtime.onMessage = {
+      addListener: function (fn) { window.__listeners.push(fn); },
+    };
+  });
+  await page.goto(server.url + '/' + PAGES + '/news.html');
+  await kit.enable(page, server.url);
+
+  const dispatch = (msg) => page.evaluate((msg) => new Promise((resolve) => {
+    let responded = false;
+    for (const fn of window.__listeners) {
+      const r = fn(msg, {}, (resp) => { responded = true; resolve(resp); });
+      if (r === true) return;
+    }
+    if (!responded) resolve(undefined);
+  }), msg);
+
+  let resp = await dispatch({ type: 'khmerlens:getPanelOpen' });
+  check('getPanelOpen reports open (panel auto-opens on enable)', resp && resp.open === true, JSON.stringify(resp));
+
+  resp = await dispatch({ type: 'khmerlens:togglePanel' });
+  check('togglePanel closes it and reports open:false', resp && resp.open === false, JSON.stringify(resp));
+  check('panel DOM actually reflects closed state',
+    (await page.evaluate(() => globalThis.KhmerLensPanel.isOpen())) === false);
+
+  resp = await dispatch({ type: 'khmerlens:togglePanel' });
+  check('togglePanel again reopens it', resp && resp.open === true, JSON.stringify(resp));
+  await page.close();
+
+  // D2: action.html/action.js — the popup's own "Paste panel" switch, driven
+  // against a mocked background so it can be tested without an activeTab
+  // gesture (Playwright can't simulate a real toolbar click; see partB).
+  const page2 = await browser.newPage();
+  await page2.addInitScript(() => {
+    let enabled = false;
+    let panelOpen = false;
+    window.chrome = {
+      runtime: {
+        lastError: null,
+        sendMessage: function (msg, cb) {
+          if (msg.type === 'khmerlens:getEnabled') { cb({ enabled }); return; }
+          if (msg.type === 'khmerlens:toggle') {
+            enabled = !enabled;
+            panelOpen = enabled; // matches content.js: enabling auto-opens the panel
+            cb({ enabled, blocked: false });
+            return;
+          }
+          if (msg.type === 'khmerlens:getPanelOpen') { cb({ open: panelOpen }); return; }
+          if (msg.type === 'khmerlens:togglePanel') { panelOpen = !panelOpen; cb({ open: panelOpen }); }
+        },
+      },
+    };
+  });
+  await page2.goto(server.url + '/extension/action/action.html');
+
+  check('panel switch starts disabled (KhmerLens off)',
+    (await page2.$eval('#panelToggle', (el) => el.disabled)) === true);
+
+  await page2.click('#toggle');
+  await page2.waitForTimeout(30);
+  check('enabling KhmerLens enables the panel switch, checked',
+    (await page2.$eval('#panelToggle', (el) => el.disabled)) === false &&
+    (await page2.$eval('#panelToggle', (el) => el.checked)) === true);
+
+  await page2.click('#panelToggle');
+  await page2.waitForTimeout(30);
+  check('panel switch turns off independently, KhmerLens stays on',
+    (await page2.$eval('#panelToggle', (el) => el.checked)) === false &&
+    (await page2.$eval('#toggle', (el) => el.checked)) === true);
+
+  await page2.click('#toggle'); // KhmerLens off
+  await page2.waitForTimeout(30);
+  check('disabling KhmerLens disables and unchecks the panel switch',
+    (await page2.$eval('#panelToggle', (el) => el.disabled)) === true &&
+    (await page2.$eval('#panelToggle', (el) => el.checked)) === false);
+
+  await browser.close();
+  await server.close();
+}
+
 (async () => {
   console.log('— Part A: content-script integration —');
   await partA();
   console.log('\n— Part B: extension smoke (permission model) —');
   await partB();
   await partC();
+  await partD();
   console.log(failures ? `\n${failures} FAILURES` : '\nAll browser checks passed.');
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });

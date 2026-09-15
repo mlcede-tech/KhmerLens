@@ -462,9 +462,16 @@
     }
   }
 
-  chrome.runtime.onMessage.addListener(function (msg) {
+  chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     if (msg && msg.type === 'khmerlens:setEnabled') {
       setEnabled(!!msg.enabled);
+      return;
+    }
+    if (msg && (msg.type === 'khmerlens:togglePanel' || msg.type === 'khmerlens:getPanelOpen')) {
+      var panel = globalThis.KhmerLensPanel;
+      if (panel && msg.type === 'khmerlens:togglePanel') panel.toggle();
+      sendResponse({ open: !!(panel && panel.isOpen()) });
+      return;
     }
   });
 

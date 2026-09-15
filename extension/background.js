@@ -127,7 +127,34 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     });
     return true; // async
   }
+
+  if (msg && msg.type === 'khmerlens:getPanelOpen') {
+    relayToActiveTab(msg, { open: false }, sendResponse);
+    return true; // async
+  }
+
+  if (msg && msg.type === 'khmerlens:togglePanel') {
+    relayToActiveTab(msg, { open: false }, sendResponse);
+    return true; // async
+  }
 });
+
+// Forward a popup-originated message to the content script running in the
+// active tab (the popup itself isn't a tab, so it can't message it directly)
+// and hand its response straight back to the popup. Targeted at frameId 0:
+// the paste panel only ever exists in the top frame (panel.js no-ops in
+// subframes), so without this a page with iframes could have a subframe's
+// harmless {open:false} race the real answer back to the popup.
+function relayToActiveTab(msg, fallback, sendResponse) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    var tab = tabs && tabs[0];
+    if (!tab || !tab.id) { sendResponse(fallback); return; }
+    chrome.tabs.sendMessage(tab.id, msg, { frameId: 0 }, function (resp) {
+      if (chrome.runtime.lastError) { sendResponse(fallback); return; }
+      sendResponse(resp || fallback);
+    });
+  });
+}
 
 // Navigation revokes activeTab and tears down injected scripts: clear the
 // tab's state so the user re-activates on the new page.
