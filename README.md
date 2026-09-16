@@ -86,7 +86,7 @@ Access settings by right-clicking the extension icon → **Options**:
 - **Romanization:** Show/hide romanization (Wiktionary phonetic scheme)
 - **On-page Highlight:** Highlight Khmer text when hovering
 - **Anki integration:** Enable/disable, AnkiConnect address, target deck, note type, per-field mapping (word / romanization / definition / part of speech), and tags
-- **Look up missing definitions on kheng.info:** Opt-in, off by default. When enabled (which requests an optional host permission for `https://kheng.info/*`), words with no bundled definition show a **K kheng.info** button — click it, or press **K**, to fetch that one word's definition on demand and show it inline (it can also fill an Anki card). Results are cached briefly on-device; nothing is bundled or redistributed.
+- **Look up missing definitions on kheng.info:** Opt-in, off by default. When enabled (which requests an optional host permission for `https://kheng.info/*`), words with no bundled definition show a **Look up on kheng.info** button — click it, or press **K**, to fetch that one word's definition on demand and show it inline (it can also fill an Anki card). Results are cached briefly on-device; nothing is bundled or redistributed.
 
 ### Audio pronunciation
 

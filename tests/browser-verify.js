@@ -486,7 +486,21 @@ async function partE() {
   check('K kheng.info button appears for a gloss-less match', btnShown);
   const word = (await popupState(page)).word;
 
-  // Feed the service-worker stub the saved hit fixture, then click the button.
+  // The pill lives in the popup body; confirm its center actually hit-tests to
+  // our shadow host (i.e. a real click lands on it, not on page text beneath).
+  const clickable = await page.evaluate(() => {
+    const host = document.getElementById('khmerlens-host');
+    const card = host.shadowRoot.querySelector('.kl-card');
+    const btn = card.querySelector('.kl-kheng');
+    const r = btn.getBoundingClientRect();
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return hit === host; // shadow content reports the host as the hit target
+  });
+  check('lookup button is the topmost element at its center (pointer-events)', clickable);
+
+  // Feed the service-worker stub the saved hit fixture, then click the button
+  // (exercises the real click path — regressed once when the pill inherited the
+  // card's pointer-events:none).
   const hitHtml = fs.readFileSync(
     path.join(__dirname, 'fixtures', 'pages', 'kheng-hit.html'), 'utf8');
   await page.evaluate((html) => { window.__khengHtml = html; }, hitHtml);
@@ -498,6 +512,19 @@ async function partE() {
     !!st.gloss && /happy/.test(st.gloss), st.gloss && st.gloss.slice(0, 50));
   check('the queried word was sent to the lookup bridge',
     (await page.evaluate(() => window.__khengQueries || [])).includes(word));
+  const source = await page.evaluate(() => {
+    const host = document.getElementById('khmerlens-host');
+    const card = host && host.shadowRoot && host.shadowRoot.querySelector('.kl-card');
+    const s = card && card.querySelector('.kl-source');
+    return s ? s.textContent : null;
+  });
+  check('fetched definition is labeled via kheng.info', source === 'via kheng.info', source);
+  check('lookup CTA is gone once a definition is shown',
+    !(await page.evaluate(() => {
+      const host = document.getElementById('khmerlens-host');
+      const card = host && host.shadowRoot && host.shadowRoot.querySelector('.kl-card');
+      return !!(card && card.querySelector('.kl-kheng'));
+    })));
 
   // The popup is still on the gloss-less match with fetched senses; adding it
   // to Anki should carry those senses, not a blank definition.
