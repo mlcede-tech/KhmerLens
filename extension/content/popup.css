@@ -36,7 +36,8 @@
 
 .kl-card .kl-ext,
 .kl-card .kl-audio,
-.kl-card .kl-actions {
+.kl-card .kl-actions,
+.kl-card .kl-kheng {
   pointer-events: auto;
 }
 
@@ -130,6 +131,39 @@
 .kl-nogloss {
   color: var(--kl-muted);
   font-style: italic;
+}
+
+.kl-kheng {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 2px;
+  background: none;
+  border: 1px solid var(--kl-border);
+  border-radius: 6px;
+  color: var(--kl-accent);
+  font: inherit;
+  font-size: 0.9em;
+  padding: 5px 8px;
+  cursor: pointer;
+}
+.kl-kheng:hover {
+  background: var(--kl-chip-bg);
+}
+.kl-kheng .kl-key {
+  border: 1px solid var(--kl-border);
+  border-radius: 4px;
+  padding: 0 5px;
+  font-size: 0.82em;
+  font-weight: 600;
+}
+
+.kl-source {
+  color: var(--kl-muted);
+  font-size: 0.78em;
+  margin-top: 2px;
 }
 
 .kl-foot {

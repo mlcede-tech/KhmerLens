@@ -305,7 +305,8 @@
     var senses = dict.senses(m.word) || [];
     // Fall back to a live kheng.info definition once one has been fetched for
     // this match, so it renders through the same sense-line path as the dict.
-    if (!senses.length && m.khengSenses) senses = m.khengSenses;
+    var fromKheng = false;
+    if (!senses.length && m.khengSenses) { senses = m.khengSenses; fromKheng = true; }
     card.textContent = '';
 
     var head = el('div', 'kl-head');
@@ -354,9 +355,25 @@
         line.appendChild(el('span', 'kl-gloss', s[2]));
         body.appendChild(line);
       });
+      // Mark a live-fetched definition so it isn't mistaken for a bundled one.
+      if (fromKheng) body.appendChild(el('div', 'kl-source', 'via kheng.info'));
     } else {
       body.appendChild(el('div', 'kl-nogloss',
         'No English definition in the bundled dictionary.'));
+      // Live kheng.info lookup: a contextual call-to-action, shown only while
+      // there is no definition to display. Triggers the same fetch as the K key.
+      if (settings.khengEnabled && khengApplicable()) {
+        var khengBtn = el('button', 'kl-kheng');
+        khengBtn.type = 'button';
+        khengBtn.title = 'Fetch definition from kheng.info (K)';
+        khengBtn.appendChild(el('span', 'kl-key', 'K'));
+        khengBtn.appendChild(el('span', null, 'Look up on kheng.info'));
+        khengBtn.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          lookupKheng();
+        });
+        body.appendChild(khengBtn);
+      }
     }
     card.appendChild(body);
 
@@ -399,20 +416,6 @@
       nextWord();
     });
     actions.appendChild(nextBtn);
-
-    // Live kheng.info lookup: only offered when the bundled dictionary has no
-    // gloss for this word (khengApplicable). The external link + "No English
-    // definition" message stay; this button is the live-fetch affordance.
-    if (settings.khengEnabled && khengApplicable()) {
-      var khengBtn = el('button', 'kl-act kl-kheng', 'K kheng.info');
-      khengBtn.type = 'button';
-      khengBtn.title = 'Fetch definition from kheng.info (K)';
-      khengBtn.addEventListener('click', function (ev) {
-        ev.stopPropagation();
-        lookupKheng();
-      });
-      actions.appendChild(khengBtn);
-    }
 
     if (settings.ankiEnabled) {
       var anki = el('button', 'kl-act kl-anki', 'A Anki');
@@ -664,7 +667,8 @@
     // bare `k`: live kheng.info lookup. Excludes altKey so Alt+K stays the
     // browser toggle; only fires when the button would be shown.
     if (ev.key === 'k' && !ev.metaKey && !ev.ctrlKey && !ev.altKey &&
-        settings.khengEnabled && khengApplicable()) {
+        settings.khengEnabled && khengApplicable() &&
+        !current.matches[current.index].khengSenses) {
       lookupKheng();
       ev.preventDefault();
     }
