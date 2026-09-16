@@ -5,7 +5,7 @@
   "description": "Hover over Khmer text to see instant English definitions, romanization, and word frequency. Works fully offline.",
   "minimum_chrome_version": "105",
   "permissions": ["activeTab", "scripting", "storage", "clipboardWrite"],
-  "optional_host_permissions": ["http://127.0.0.1/*", "http://localhost/*"],
+  "optional_host_permissions": ["http://127.0.0.1/*", "http://localhost/*", "https://kheng.info/*"],
   "background": {
     "service_worker": "background.js"
   },

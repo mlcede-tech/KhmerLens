@@ -1,0 +1,138 @@
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <meta charset='utf-8'>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="google-site-verification" content="8c02MF07iTBG-8KuKMrgvWwDjhvpPbTDr8ufbVy-tlE" />
+    <title>kheng.info / search</title>
+
+    
+    <meta name='keywords' content='Khmer, English, dictionary, search, definition'>
+    <meta name='description' content='A search interface for the Headley Khmer-English dictionaries and the Babiloo English-Khmer dictionary.'>
+
+
+
+
+    <link rel="shortcut icon" type='image/png' href="/static/kheng_info/css/img/favicon.ico"/>
+    <link rel='stylesheet' href="/static/kheng_info/css/base.css">
+
+    
+<link rel="stylesheet" href="/static/search/css/search.css">
+
+
+    <script src="/static/kheng_info/js/jquery-2.1.0.min.js"></script>
+    <script src="/static/kheng_info/js/play_audio.js"></script>
+    <script src="/static/kheng_info/js/saart_notification.js"></script>
+
+    
+<script src="/static/kheng_info/js/display_section.js"></script>
+<script src="/static/search/js/search_options.js"></script>
+
+
+  </head>
+
+  <body>
+
+    <div class="audio_box" style="height:0px;">
+      <audio id="player" controls="controls">
+        <source id="mp3_src" src="" type="audio/mpeg" />
+        <source id="ogg_src" src="" type="application/ogg" />
+          Your browser does not support HTML5 audio.
+      </audio>
+    </div>
+
+    <header>
+
+      <nav class='menu'>
+
+        <!--<div class='search-box-wrapper'>
+          <form method='GET' action='../search/'>
+            <input name='query' type='text' placeholder="search..." accept-charset='utf-8' class='search-box'>
+            <input type="hidden" name='is_ipa' value=''>
+            <input type="hidden" name='is_regex' value=''>
+          </form>
+        </div>-->
+
+        <a href='/'>READ</a>
+        <a href='/search/'>SEARCH</a>
+        <a href='/categories/'>CATEGORIES</a>
+        <a href='/frequencies/'>FREQUENCIES</a>
+        <a href='/about/'>ABOUT</a>
+
+        <!--<button type="submit" class="saart-notification-button" title="A notification from kheng.info"></button>-->
+
+      </nav>
+
+    </header>
+
+    <main>
+      
+
+
+
+
+  <div class='left-panel'>
+
+
+    <form class='search-form' method='GET' action='../search/'>
+      <input class='search-box' name='query' type='text' placeholder="search Khmer / English / IPA / regex..." accept-charset='utf-8'>
+      <input class='' type="checkbox" name='is_ipa' value='' label="IPA">
+      <label for="is_ipa" class="is-ipa">IPA</label>
+      <input class='' type="checkbox" name='is_regex' value='' label="REGEX">
+      <label for="is_regex" class="is-regex">REGEX</label>
+    </form>
+
+    <div class='search-explanation'>
+      Enter a Khmer or English search in the upper-left corner.
+      <br>
+      <br>
+      Kheng.info also supports searching in IPA (for Khmer entries) and searching with regular expressions (by default on Khmer headwords, but optionally on IPA too). Click the boxes above to enable IPA and regex searching.
+    </div>
+
+    <!--<div class='is_ipa '>IPA</div>
+    <div class='is_regex '>REGEX</div>
+-->
+  </div>
+
+  <div class='right-panel'>
+    
+
+    <div class='search_results_header'>Khmer to English</div>
+
+    <table>
+    
+    </table>
+
+    
+
+    <table>
+    
+    </table>
+
+    
+
+    <table>
+    
+    </table>
+
+
+  </div>
+
+
+
+    </main>
+
+    <!--<div class="overlay-wrapper">
+      <div class="overlay">
+        <div class="saart-message">
+          The co-creator and voice of kheng.info, Sinett, recently opened a small clothing shop in Phnom Penh. If you have found kheng.info helpful over the years, you can support Sinett by visiting her shop at #9E0 st. 184, or by browsing online at <a href="https://saartclothing.com" class="saart-link">saartclothing.com</a>. Thanks!
+        </div>
+      </div>
+    </div>-->
+
+  </body>
+</html>

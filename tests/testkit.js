@@ -45,6 +45,7 @@ function startServer() {
 async function primePage(page, baseUrl) {
   await page.addInitScript(function (base) {
     var _sync = {};
+    var _local = {};
     window.chrome = {
       runtime: {
         lastError: null,
@@ -53,6 +54,16 @@ async function primePage(page, baseUrl) {
           if (msg && msg.type === 'khmerlens:ankiAdd') {
             window.__ankiAdds = (window.__ankiAdds || []).concat(msg.entry);
             if (cb) cb({ ok: true });
+            return;
+          }
+          if (msg && msg.type === 'khmerlens:khengLookup') {
+            window.__khengQueries = (window.__khengQueries || []).concat(msg.word);
+            if (cb) {
+              cb(window.__khengResp ||
+                (window.__khengHtml != null
+                  ? { ok: true, html: window.__khengHtml }
+                  : { ok: false, status: 'unreachable' }));
+            }
             return;
           }
           if (cb) cb({ enabled: false });
@@ -68,6 +79,15 @@ async function primePage(page, baseUrl) {
           },
           set: function (v, cb) { Object.assign(_sync, v); if (cb) cb(); },
         },
+        local: {
+          get: function (key, cb) {
+            var o = {};
+            if (typeof key === 'string') o[key] = _local[key];
+            else for (var k in key) o[k] = (k in _local) ? _local[k] : key[k];
+            cb(o);
+          },
+          set: function (v, cb) { Object.assign(_local, v); if (cb) cb(); },
+        },
         onChanged: { addListener: function () {} },
       },
     };
@@ -77,7 +97,7 @@ async function primePage(page, baseUrl) {
 
 // Load the real content-script bundle and enable it.
 async function enable(page, baseUrl) {
-  var files = ['lib/khmer.js', 'lib/dictionary.js', 'lib/popup.js', 'lib/audio.js', 'lib/anki.js', 'content/panel.js', 'content/content.js'];
+  var files = ['lib/khmer.js', 'lib/dictionary.js', 'lib/popup.js', 'lib/audio.js', 'lib/anki.js', 'lib/kheng.js', 'content/panel.js', 'content/content.js'];
   for (var f of files) {
     await page.addScriptTag({ url: baseUrl + '/extension/' + f });
   }

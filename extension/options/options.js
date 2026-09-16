@@ -11,9 +11,11 @@ var DEFAULTS = {
   ankiModel: '',
   ankiFieldMap: {},
   ankiTags: 'khmerlens',
+  khengEnabled: false,
 };
 
 var ANKI_ORIGINS = ['http://127.0.0.1/*', 'http://localhost/*'];
+var KHENG_ORIGINS = ['https://kheng.info/*'];
 
 // chrome.storage.sync when running as an extension; localStorage fallback so
 // the page still works when opened as a plain file (e.g. for previewing).
@@ -129,6 +131,7 @@ function save() {
     ankiModel: state.ankiModel,
     ankiFieldMap: state.ankiFieldMap,
     ankiTags: state.ankiTags,
+    khengEnabled: state.khengEnabled,
   }, flashSaved);
 }
 
@@ -305,6 +308,59 @@ ankiUI.model.addEventListener('change', function () {
   loadModelFields();
 });
 
+// --- kheng.info live lookup -----------------------------------------------
+var khengToggle = document.getElementById('khengEnabled');
+
+function khengHasPermission() {
+  if (typeof chrome === 'undefined' || !chrome.permissions) {
+    return Promise.resolve(true); // plain-file preview
+  }
+  return new Promise(function (resolve) {
+    chrome.permissions.contains({ origins: KHENG_ORIGINS }, function (has) {
+      resolve(!!has);
+    });
+  });
+}
+
+function requestKhengPermission() {
+  if (typeof chrome === 'undefined' || !chrome.permissions) {
+    return Promise.resolve(true); // plain-file preview
+  }
+  return new Promise(function (resolve) {
+    chrome.permissions.request({ origins: KHENG_ORIGINS }, function (granted) {
+      resolve(!!granted);
+    });
+  });
+}
+
+function removeKhengPermission() {
+  if (typeof chrome === 'undefined' || !chrome.permissions) {
+    return Promise.resolve();
+  }
+  return new Promise(function (resolve) {
+    chrome.permissions.remove({ origins: KHENG_ORIGINS }, function () { resolve(); });
+  });
+}
+
+khengToggle.addEventListener('change', function (e) {
+  if (e.target.checked) {
+    requestKhengPermission().then(function (granted) {
+      if (!granted) {
+        e.target.checked = false;
+        state.khengEnabled = false;
+        return;
+      }
+      state.khengEnabled = true;
+      save();
+    });
+  } else {
+    removeKhengPermission().then(function () {
+      state.khengEnabled = false;
+      save();
+    });
+  }
+});
+
 // react to system theme changes while 'auto' is selected
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
   if (state.theme === 'auto') renderPreview();
@@ -320,4 +376,8 @@ store.get(DEFAULTS, function (items) {
   renderPreview();
   paintAnki();
   if (state.ankiEnabled) ankiConnect();
+  khengHasPermission().then(function (granted) {
+    state.khengEnabled = !!(items.khengEnabled && granted);
+    khengToggle.checked = state.khengEnabled;
+  });
 });

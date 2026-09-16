@@ -68,6 +68,7 @@ Hover over any Khmer word on any webpage, and a popup appears instantly with:
 - Settings are stored locally on your device
 - External links (kheng.info) open only when you click them
 - All dictionary lookups happen offline, locally
+- **Optional live lookup (off by default):** you can turn on an opt-in feature that fetches a definition from kheng.info for a word that has no bundled definition. It requests a permission when you enable it, and sends only that single word, only when you click the button (or press K)
 
 **Inspired by Zhongwen** (a Chinese popup dictionary), but built from scratch with no code reused.
 

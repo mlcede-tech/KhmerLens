@@ -73,6 +73,7 @@ The panel automatically converts pasted content to plain text, so formatting fro
 | **n** | Jump to next Khmer word on page |
 | **s** | Play pronunciation (bundled recording, or system Khmer voice if installed) |
 | **a** | Add the word to Anki (when Anki integration is enabled) |
+| **K** | Look up the word on kheng.info (when the optional lookup feature is enabled, for words with no bundled definition) |
 | **Esc** | Hide popup |
 
 ## Options
@@ -84,6 +85,7 @@ Access settings by right-clicking the extension icon → **Options**:
 - **Romanization:** Show/hide romanization (Wiktionary phonetic scheme)
 - **On-page Highlight:** Highlight Khmer text when hovering
 - **Anki integration:** Enable/disable, AnkiConnect address, target deck, note type, per-field mapping (word / romanization / definition / part of speech), and tags
+- **Look up missing definitions on kheng.info:** Opt-in, off by default. When enabled (which requests an optional host permission for `https://kheng.info/*`), words with no bundled definition show a **K kheng.info** button — click it, or press **K**, to fetch that one word's definition on demand and show it inline (it can also fill an Anki card). Results are cached briefly on-device; nothing is bundled or redistributed.
 
 ### Audio pronunciation
 
@@ -181,6 +183,8 @@ KhmerLens collects **no data whatsoever**:
 - All word lookups performed locally
 - Settings stored locally (or synced via Chrome sync if enabled)
 - External links (kheng.info) only opened on explicit user click
+
+The optional **kheng.info lookup** feature (see Options) is the only exception, and it is **off by default**. When you enable it, Chrome requests an **optional host permission** for `https://kheng.info/*`, granted only at that point — so a default install still has **no host permissions**. When enabled, KhmerLens sends a single Khmer word to kheng.info only when you click the lookup button or press **K**, and caches the result locally; nothing else is transmitted.
 
 See [privacy-policy.md](docs/privacy-policy.md) for details.
 
