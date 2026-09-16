@@ -69,6 +69,7 @@ function popupState(page) {
       audioBtn: !!card.querySelector('.kl-audio'),
       copyBtn: !!card.querySelector('.kl-copy'),
       nextBtn: !!card.querySelector('.kl-next'),
+      ext: q('.kl-ext'),
       inViewport: rect.left >= 0 && rect.top >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight,
       highlighted: !!(CSS.highlights && CSS.highlights.get('khmerlens')),
     };
@@ -100,6 +101,41 @@ async function partA() {
   check('popup inside viewport', st.inViewport);
   check('match highlighted on page', st.highlighted);
   await page.screenshot({ path: path.join(SHOTS, '01-news-hover.png') });
+
+  // safe-harbor: hovering the popup surface keeps it open and does not reposition
+  const cardBox = await page.evaluate(() => {
+    const card = document.getElementById('khmerlens-host').shadowRoot.querySelector('.kl-card');
+    const r = card.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2, left: r.left, top: r.top };
+  });
+  const harborWord = st.word;
+  await page.mouse.move(cardBox.x, cardBox.y);
+  await page.waitForTimeout(200);
+  const afterHarbor = await page.evaluate(() => {
+    const card = document.getElementById('khmerlens-host').shadowRoot.querySelector('.kl-card');
+    const r = card.getBoundingClientRect();
+    return { visible: !card.classList.contains('kl-hidden'),
+      word: card.querySelector('.kl-word').textContent, left: r.left, top: r.top };
+  });
+  check('hovering popup keeps it open (safe harbor)', afterHarbor.visible);
+  check('hovering popup does not reposition it',
+    Math.abs(afterHarbor.left - cardBox.left) < 1 && Math.abs(afterHarbor.top - cardBox.top) < 1);
+  check('hovering popup does not re-analyze the word', afterHarbor.word === harborWord, afterHarbor.word);
+
+  // K shortcut opens kheng.info for the current word (stub window.open)
+  await page.evaluate(() => {
+    window.__opened = [];
+    window.open = (url) => { window.__opened.push(url); return null; };
+  });
+  await page.keyboard.press('k');
+  await page.waitForTimeout(80);
+  const opened = await page.evaluate(() => window.__opened || []);
+  check('K opens kheng.info for the current word',
+    opened.length === 1 && opened[0].startsWith('https://kheng.info/search/?query=') &&
+    opened[0].includes(encodeURIComponent(harborWord)),
+    JSON.stringify(opened).slice(0, 100));
+  check('kheng.info link label advertises K shortcut',
+    (st.ext || '').includes('K') && (st.ext || '').includes('kheng.info'), st.ext);
 
   const wordBefore = st.word;
   await page.keyboard.press('Shift');

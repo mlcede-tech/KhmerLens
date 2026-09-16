@@ -245,10 +245,11 @@
     card.appendChild(body);
 
     var foot = el('div', 'kl-foot');
-    var ext = el('a', 'kl-ext', 'kheng.info ↗');
+    var ext = el('a', 'kl-ext', 'K kheng.info ↗');
     ext.href = 'https://kheng.info/search/?query=' + encodeURIComponent(m.word);
     ext.target = '_blank';
     ext.rel = 'noopener noreferrer';
+    ext.title = 'Open on kheng.info (K)';
     foot.appendChild(ext);
 
     foot.appendChild(el('span', 'kl-status'));
@@ -328,19 +329,18 @@
     }
   }
 
-  // Bounding box enclosing both the hovered word and the open popup, plus a
-  // small margin. While the cursor is inside it we leave the popup alone —
-  // otherwise every mousemove on the way from the word to e.g. the kheng.info
-  // link re-runs the lookup, and since the popup is re-positioned relative to
-  // wherever the cursor now is, it keeps hopping just out of reach.
-  function inSafeZone(x, y) {
-    if (!current || !current.wordRect || !current.popupRect) return false;
-    var a = current.wordRect, b = current.popupRect, m = 12;
-    var left = Math.min(a.left, b.left) - m;
-    var top = Math.min(a.top, b.top) - m;
-    var right = Math.max(a.right, b.right) + m;
-    var bottom = Math.max(a.bottom, b.bottom) + m;
-    return x >= left && x <= right && y >= top && y <= bottom;
+  // A thin halo around the popup only (NOT the hovered word). The card itself
+  // is pointer-events:auto, so hovering the black surface already freezes the
+  // popup via the host.contains() guard in onMouseMove. This halo just bridges
+  // the small gap between the word and the popup while the cursor travels to
+  // it, so the popup doesn't hop away mid-reach. Everything outside the halo —
+  // including words right next to the one you hovered — stays fully responsive.
+  var POPUP_HALO = 12;
+  function inPopupHalo(x, y) {
+    if (!current || !current.popupRect) return false;
+    var b = current.popupRect, m = POPUP_HALO;
+    return x >= b.left - m && x <= b.right + m &&
+           y >= b.top - m && y <= b.bottom + m;
   }
 
   function hidePopup() {
@@ -442,17 +442,9 @@
       return;
     }
 
-    var wordRect = null;
-    try {
-      var wr = new Range();
-      wr.setStart(caret.node, m0.start);
-      wr.setEnd(caret.node, m0.end);
-      wordRect = wr.getBoundingClientRect();
-    } catch (e) { /* node may be gone */ }
-
     current = {
       matches: matches, index: 0, node: caret.node, cursorX: x, cursorY: y,
-      wordRect: wordRect, popupRect: null,
+      popupRect: null,
     };
     renderPopup();
     showPopupAt(x, y);
@@ -462,13 +454,14 @@
   // ---------------------------------------------------------------- events
   function onMouseMove(ev) {
     if (!enabled) return;
-    // ignore moves over our own popup (e.g. reaching for the kheng.info
-    // link) so the popup doesn't hide or re-render underneath the cursor
+    // ignore moves over our own popup (the card is pointer-events:auto, so the
+    // event target retargets to our shadow host) — hovering the black surface
+    // keeps the popup open so you can reach the link and buttons
     if (host && (ev.target === host || host.contains(ev.target))) return;
-    // also ignore moves in the gap between the hovered word and the popup —
-    // otherwise the cursor's path there keeps re-triggering lookups that
-    // reposition (or hide) the popup before it can be reached
-    if (visible && inSafeZone(ev.clientX, ev.clientY)) return;
+    // plus a thin halo around the popup, to bridge the small gap while the
+    // cursor travels from the word onto the card. Words outside this halo —
+    // including ones right next to the hovered word — stay fully responsive
+    if (visible && inPopupHalo(ev.clientX, ev.clientY)) return;
     lastMouse.x = ev.clientX;
     lastMouse.y = ev.clientY;
     if (hoverTimer) clearTimeout(hoverTimer);
@@ -520,6 +513,11 @@
       ev.preventDefault();
       return;
     }
+    if (ev.key === 'k' && !ev.metaKey && !ev.ctrlKey && !ev.altKey) {
+      openKheng();
+      ev.preventDefault();
+      return;
+    }
     if (ev.key === 's' && !ev.metaKey && !ev.ctrlKey && !ev.altKey) {
       speakCurrent();
       ev.preventDefault();
@@ -537,15 +535,17 @@
     if (!current || current.matches.length < 2) return;
     current.index = (current.index + 1) % current.matches.length;
     var m = current.matches[current.index];
-    try {
-      var wr = new Range();
-      wr.setStart(current.node, m.start);
-      wr.setEnd(current.node, m.end);
-      current.wordRect = wr.getBoundingClientRect();
-    } catch (e) { /* node may be gone */ }
     renderPopup();
     showPopupAt(current.cursorX, current.cursorY);
     setHighlight(current.node, m.start, m.end);
+  }
+
+  /** Open kheng.info for the current word in a new tab. */
+  function openKheng() {
+    if (!current) return;
+    var word = current.matches[current.index].word;
+    var url = 'https://kheng.info/search/?query=' + encodeURIComponent(word);
+    window.open(url, '_blank', 'noopener');
   }
 
   function copyCurrent() {
@@ -608,7 +608,7 @@
           current = {
             matches: matches, index: 0, node: node,
             cursorX: r.left, cursorY: r.bottom,
-            wordRect: r, popupRect: null,
+            popupRect: null,
           };
           renderPopup();
           showPopupAt(r.left, r.bottom);

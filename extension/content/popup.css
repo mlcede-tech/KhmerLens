@@ -30,20 +30,18 @@
   opacity: 1;
   transform: translateY(0);
   transition: opacity 90ms ease-out, transform 90ms ease-out;
-  pointer-events: none; /* never intercept the page */
-  overflow-wrap: anywhere;
-}
-
-.kl-card .kl-ext,
-.kl-card .kl-audio,
-.kl-card .kl-actions {
+  /* The card is a hover safe-harbor: hovering it freezes the popup (see the
+     host.contains guard in content.js) so you can reach the link and buttons.
+     Only becomes interactive once shown, so a hidden card never blocks clicks. */
   pointer-events: auto;
+  overflow-wrap: anywhere;
 }
 
 .kl-card.kl-hidden {
   opacity: 0;
   transform: translateY(4px);
   visibility: hidden;
+  pointer-events: none; /* a hidden card must never block the page */
 }
 
 .kl-card.kl-dark {
