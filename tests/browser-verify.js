@@ -301,8 +301,14 @@ async function partC() {
   await page.goto(server.url + '/' + PAGES + '/news.html'); // any served page; panel is an overlay
   await kit.enable(page, server.url);
 
-  const opened = await page.evaluate(() => !!(globalThis.KhmerLensPanel && globalThis.KhmerLensPanel.isOpen()));
-  check('panel opens when enabled', opened);
+  const closedOnEnable = await page.evaluate(() => !(globalThis.KhmerLensPanel && globalThis.KhmerLensPanel.isOpen()));
+  check('panel stays closed when KhmerLens is enabled (opens only via its own toggle)', closedOnEnable);
+
+  const opened = await page.evaluate(() => {
+    globalThis.KhmerLensPanel.open();
+    return globalThis.KhmerLensPanel.isOpen();
+  });
+  check('panel opens on explicit open()', opened);
 
   // put clean Khmer into the editable (simulates a paste result)
   const placed = await page.evaluate(() => {
@@ -361,15 +367,15 @@ async function partD() {
   }), msg);
 
   let resp = await dispatch({ type: 'khmerlens:getPanelOpen' });
-  check('getPanelOpen reports open (panel auto-opens on enable)', resp && resp.open === true, JSON.stringify(resp));
+  check('getPanelOpen reports closed (panel does not auto-open on enable)', resp && resp.open === false, JSON.stringify(resp));
 
   resp = await dispatch({ type: 'khmerlens:togglePanel' });
-  check('togglePanel closes it and reports open:false', resp && resp.open === false, JSON.stringify(resp));
-  check('panel DOM actually reflects closed state',
-    (await page.evaluate(() => globalThis.KhmerLensPanel.isOpen())) === false);
+  check('togglePanel opens it and reports open:true', resp && resp.open === true, JSON.stringify(resp));
+  check('panel DOM actually reflects open state',
+    (await page.evaluate(() => globalThis.KhmerLensPanel.isOpen())) === true);
 
   resp = await dispatch({ type: 'khmerlens:togglePanel' });
-  check('togglePanel again reopens it', resp && resp.open === true, JSON.stringify(resp));
+  check('togglePanel again closes it', resp && resp.open === false, JSON.stringify(resp));
   await page.close();
 
   // D2: action.html/action.js — the popup's own "Paste panel" switch, driven
@@ -386,7 +392,7 @@ async function partD() {
           if (msg.type === 'khmerlens:getEnabled') { cb({ enabled }); return; }
           if (msg.type === 'khmerlens:toggle') {
             enabled = !enabled;
-            panelOpen = enabled; // matches content.js: enabling auto-opens the panel
+            if (!enabled) panelOpen = false; // matches content.js: disabling closes the panel
             cb({ enabled, blocked: false });
             return;
           }
@@ -403,14 +409,14 @@ async function partD() {
 
   await page2.click('#toggle');
   await page2.waitForTimeout(30);
-  check('enabling KhmerLens enables the panel switch, checked',
+  check('enabling KhmerLens enables the panel switch, unchecked (panel does not auto-open)',
     (await page2.$eval('#panelToggle', (el) => el.disabled)) === false &&
-    (await page2.$eval('#panelToggle', (el) => el.checked)) === true);
+    (await page2.$eval('#panelToggle', (el) => el.checked)) === false);
 
   await page2.click('#panelToggle');
   await page2.waitForTimeout(30);
-  check('panel switch turns off independently, KhmerLens stays on',
-    (await page2.$eval('#panelToggle', (el) => el.checked)) === false &&
+  check('panel switch turns on independently, KhmerLens stays on',
+    (await page2.$eval('#panelToggle', (el) => el.checked)) === true &&
     (await page2.$eval('#toggle', (el) => el.checked)) === true);
 
   await page2.click('#toggle'); // KhmerLens off
@@ -444,7 +450,9 @@ async function partE() {
   // "មករ" is a gloss-less dictionary word, but its prefix "មក" is a glossed
   // word that wins first place at the hover point; the gloss-less full word is
   // an alternate segmentation reachable by Shift-cycling (real user behavior).
+  // The panel no longer opens automatically, so open it explicitly.
   await page.evaluate(() => {
+    globalThis.KhmerLensPanel.open();
     const ed = globalThis.KhmerLensPanel.getEditableEl();
     ed.appendChild(document.createTextNode('មករ'));
   });

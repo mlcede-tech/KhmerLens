@@ -53,11 +53,12 @@ KhmerLens uses Chrome's `activeTab` model: it requests no host permissions and o
 
 For text that KhmerLens can't read in place (such as Google Docs, PDFs, or canvas-based editors), use the paste panel:
 
-1. Click the toolbar icon → a popup appears with a labeled **ON/OFF toggle**
-2. Click the toggle to turn KhmerLens **ON** — this enables hover-translation AND opens a small paste panel in the top-right corner of the page
-3. Paste Khmer text into the panel (Ctrl+V / Cmd+V)
-4. Hover over any word in the panel to see its definition
-5. Click the toggle to turn KhmerLens **OFF** — this disables the lens and closes the panel
+1. Click the toolbar icon → a popup appears with a labeled **ON/OFF toggle** and a separate **Paste panel** toggle
+2. Click the toggle to turn KhmerLens **ON**
+3. Click the **Paste panel** toggle to open a small paste panel in the top-right corner of the page (it stays off until you turn it on — it does not open automatically)
+4. Paste Khmer text into the panel (Ctrl+V / Cmd+V)
+5. Hover over any word in the panel to see its definition
+6. Click the toggle to turn KhmerLens **OFF** — this disables the lens and closes the panel
 
 The panel automatically converts pasted content to plain text, so formatting from sources like Google Docs won't interfere with word matching.
 

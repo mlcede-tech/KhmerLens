@@ -774,7 +774,6 @@
       // on first hover (all_frames would otherwise parse 1.8 MB per iframe)
       if (window === window.top) {
         ensureDict();
-        try { if (globalThis.KhmerLensPanel) globalThis.KhmerLensPanel.open(); } catch (e) { console.debug('KhmerLens panel:', e); }
       }
       document.addEventListener('mousemove', onMouseMove, true);
       document.addEventListener('keydown', onKeyDown, true);
