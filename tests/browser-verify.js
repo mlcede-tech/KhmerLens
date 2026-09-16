@@ -69,6 +69,7 @@ function popupState(page) {
       audioBtn: !!card.querySelector('.kl-audio'),
       copyBtn: !!card.querySelector('.kl-copy'),
       nextBtn: !!card.querySelector('.kl-next'),
+      prevBtn: !!card.querySelector('.kl-prev'),
       ext: q('.kl-ext'),
       inViewport: rect.left >= 0 && rect.top >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight,
       highlighted: !!(CSS.highlights && CSS.highlights.get('khmerlens')),
@@ -145,9 +146,29 @@ async function partA() {
     st.visible && (st.alt === null || st.word !== wordBefore || st.alt.includes('/')),
     `before=${wordBefore} after=${st.word} alt=${st.alt}`);
 
+  const stBeforeNext = await popupState(page);
   await page.keyboard.press('n');
   await page.waitForTimeout(150);
-  check('n jumps to next word', (await popupState(page)).visible);
+  const stAfterNext = await popupState(page);
+  check('n jumps to next word', stAfterNext.visible);
+  check('back button rendered', stAfterNext.prevBtn);
+
+  await page.keyboard.press('b');
+  await page.waitForTimeout(150);
+  const stAfterBack = await popupState(page);
+  check('b returns to the previous word',
+    stAfterBack.visible && stAfterBack.word === stBeforeNext.word,
+    `before=${stBeforeNext.word} afterNext=${stAfterNext.word} afterBack=${stAfterBack.word}`);
+
+  // clicking Back does the same thing as pressing b
+  await page.keyboard.press('n');
+  await page.waitForTimeout(150);
+  await page.click('.kl-prev');
+  await page.waitForTimeout(150);
+  const stAfterBackClick = await popupState(page);
+  check('clicking Back returns to the previous word',
+    stAfterBackClick.visible && stAfterBackClick.word === stBeforeNext.word,
+    stAfterBackClick.word);
 
   await page.keyboard.press('Escape');
   await page.waitForTimeout(120);
