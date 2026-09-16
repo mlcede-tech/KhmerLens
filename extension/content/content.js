@@ -16,6 +16,7 @@
   var dictApi = globalThis.KhmerLensDict;
   var popupMath = globalThis.KhmerLensPopup;
   var audioApi = globalThis.KhmerLensAudioLib;
+  var khengApi = globalThis.KhmerLensKheng; // kheng.info parser (lib/kheng.js)
 
   var enabled = false;
   var dict = null;        // loaded lazily on first enable
@@ -29,6 +30,7 @@
     showRoman: true,
     highlight: true,
     ankiEnabled: false,
+    khengEnabled: false,
   };
 
   // ---------------------------------------------------------------- state
@@ -119,7 +121,16 @@
   // ------------------------------------------------------------------ anki
   function addToAnki() {
     var m = current.matches[current.index];
-    var entry = { word: m.word, senses: dict ? dict.senses(m.word) || [] : [] };
+    var bundled = dict ? dict.senses(m.word) : null;
+    var entry;
+    // Prefer a live kheng.info definition when the bundled dictionary has no
+    // glosses for this word — kheng.js senses share the [pos, roman, gloss]
+    // shape lib/anki.js expects, so no field mapping is needed here.
+    if (m.khengSenses && !(bundled && bundled.length)) {
+      entry = { word: m.khengLemma || m.word, senses: m.khengSenses };
+    } else {
+      entry = { word: m.word, senses: bundled || [] };
+    }
     try {
       chrome.runtime.sendMessage(
         { type: 'khmerlens:ankiAdd', entry: entry },
@@ -140,6 +151,108 @@
         }
       );
     } catch (e) { flashFoot('Anki: extension error'); }
+  }
+
+  // ------------------------------------------------------------- kheng.info
+  // Fetched definitions are cached so repeat hovers don't refetch. A session
+  // mirror (khengMem) fronts a chrome.storage.local store capped to the newest
+  // entries via a stored insertion-order list. All storage access is wrapped:
+  // failures fall back to the network, never break the lookup.
+  var KHENG_CACHE_MAX = 500;
+  var khengMem = {};      // word -> { senses, lemma }
+  var khengOrder = [];    // insertion order of words, oldest first
+
+  try {
+    chrome.storage.local.get('khengCache', function (items) {
+      if (chrome.runtime.lastError || !items || !items.khengCache) return;
+      var store = items.khengCache;
+      for (var w in store) {
+        if (Object.prototype.hasOwnProperty.call(store, w) && store[w]) {
+          khengMem[w] = store[w];
+          khengOrder.push(w);
+        }
+      }
+    });
+  } catch (e) { /* storage unavailable: memory cache still works */ }
+
+  function khengCacheGet(word) {
+    return khengMem[word] || null;
+  }
+
+  function khengCachePut(word, senses, lemma) {
+    khengMem[word] = { senses: senses, lemma: lemma };
+    var i = khengOrder.indexOf(word);
+    if (i !== -1) khengOrder.splice(i, 1);
+    khengOrder.push(word);
+    while (khengOrder.length > KHENG_CACHE_MAX) {
+      delete khengMem[khengOrder.shift()];
+    }
+    try {
+      var store = {};
+      khengOrder.forEach(function (w) { store[w] = khengMem[w]; });
+      chrome.storage.local.set({ khengCache: store });
+    } catch (e) { /* non-fatal: memory cache still holds it this session */ }
+  }
+
+  /**
+   * Whether the kheng.info affordance applies to the current match: true when
+   * the bundled dictionary has no glosses (a gloss-less known word or the
+   * no-match ICU fallback). Shared by the render and the keyboard shortcut so
+   * they stay in lockstep.
+   */
+  function khengApplicable() {
+    if (!current) return false;
+    var m = current.matches[current.index];
+    var senses = dict ? dict.senses(m.word) || [] : [];
+    return senses.length === 0;
+  }
+
+  function lookupKheng() {
+    if (!current) return;
+    var m = current.matches[current.index];
+    var word = m.word;
+
+    var cached = khengCacheGet(word);
+    if (cached) {
+      m.khengSenses = cached.senses;
+      m.khengLemma = cached.lemma;
+      renderPopup();
+      showPopupAt(current.cursorX, current.cursorY);
+      return;
+    }
+
+    flashFoot('Looking up…');
+    try {
+      chrome.runtime.sendMessage(
+        { type: 'khmerlens:khengLookup', word: word },
+        function (resp) {
+          if (chrome.runtime.lastError || !resp) {
+            flashFoot('kheng.info unreachable');
+            return;
+          }
+          if (resp.ok) {
+            var doc = new DOMParser().parseFromString(resp.html, 'text/html');
+            var r = khengApi.parseKhengDefinition(doc, word);
+            if (r.found) {
+              m.khengSenses = r.senses;
+              m.khengLemma = r.lemma;
+              khengCachePut(word, r.senses, r.lemma);
+              // still current match? (cursor may have moved during the fetch)
+              if (current && current.matches[current.index] === m) {
+                renderPopup();
+                showPopupAt(current.cursorX, current.cursorY);
+              }
+            } else {
+              flashFoot('Not found on kheng.info');
+            }
+          } else if (resp.status === 'no-permission') {
+            flashFoot('Enable kheng.info lookup in options');
+          } else {
+            flashFoot('kheng.info unreachable');
+          }
+        }
+      );
+    } catch (e) { flashFoot('kheng.info unreachable'); }
   }
 
   // -------------------------------------------------------------- popup UI
@@ -190,6 +303,9 @@
     applyTheme(); // re-check auto theme (system scheme may have changed)
     var m = current.matches[current.index];
     var senses = dict.senses(m.word) || [];
+    // Fall back to a live kheng.info definition once one has been fetched for
+    // this match, so it renders through the same sense-line path as the dict.
+    if (!senses.length && m.khengSenses) senses = m.khengSenses;
     card.textContent = '';
 
     var head = el('div', 'kl-head');
@@ -283,6 +399,20 @@
       nextWord();
     });
     actions.appendChild(nextBtn);
+
+    // Live kheng.info lookup: only offered when the bundled dictionary has no
+    // gloss for this word (khengApplicable). The external link + "No English
+    // definition" message stay; this button is the live-fetch affordance.
+    if (settings.khengEnabled && khengApplicable()) {
+      var khengBtn = el('button', 'kl-act kl-kheng', 'K kheng.info');
+      khengBtn.type = 'button';
+      khengBtn.title = 'Fetch definition from kheng.info (K)';
+      khengBtn.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        lookupKheng();
+      });
+      actions.appendChild(khengBtn);
+    }
 
     if (settings.ankiEnabled) {
       var anki = el('button', 'kl-act kl-anki', 'A Anki');
@@ -528,6 +658,14 @@
     if (ev.key === 'a' && !ev.metaKey && !ev.ctrlKey && !ev.altKey &&
         settings.ankiEnabled) {
       addToAnki();
+      ev.preventDefault();
+      return;
+    }
+    // bare `k`: live kheng.info lookup. Excludes altKey so Alt+K stays the
+    // browser toggle; only fires when the button would be shown.
+    if (ev.key === 'k' && !ev.metaKey && !ev.ctrlKey && !ev.altKey &&
+        settings.khengEnabled && khengApplicable()) {
+      lookupKheng();
       ev.preventDefault();
     }
   }

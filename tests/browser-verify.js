@@ -423,6 +423,105 @@ async function partD() {
   await server.close();
 }
 
+async function partE() {
+  console.log('\n— Part E: kheng.info live lookup —');
+  const server = await kit.startServer();
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  await kit.primePage(page, server.url);
+  await page.goto(server.url + '/' + PAGES + '/news.html');
+  await kit.enable(page, server.url);
+
+  // Turn the opt-in lookup on (and Anki, to check fetched senses feed a card),
+  // then re-read settings (mirrors Part A's anki flow).
+  await page.evaluate(() =>
+    new Promise((r) => chrome.storage.sync.set({ khengEnabled: true, ankiEnabled: true }, r)));
+  await page.evaluate(() => {
+    window.KhmerLensTest.setEnabled(false);
+    window.KhmerLensTest.setEnabled(true);
+  });
+
+  // "មករ" is a gloss-less dictionary word, but its prefix "មក" is a glossed
+  // word that wins first place at the hover point; the gloss-less full word is
+  // an alternate segmentation reachable by Shift-cycling (real user behavior).
+  await page.evaluate(() => {
+    const ed = globalThis.KhmerLensPanel.getEditableEl();
+    ed.appendChild(document.createTextNode('មករ'));
+  });
+
+  const pt = await page.evaluate(() => {
+    const ed = globalThis.KhmerLensPanel.getEditableEl();
+    const walker = document.createTreeWalker(ed, NodeFilter.SHOW_TEXT);
+    let node; while ((node = walker.nextNode())) { if (node.data.trim()) break; }
+    const r = new Range(); r.setStart(node, 0); r.setEnd(node, 1);
+    const rect = r.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  });
+  await page.mouse.move(pt.x, pt.y);
+  await page.waitForTimeout(300);
+
+  const hasKhengBtn = () => page.evaluate(() => {
+    const host = document.getElementById('khmerlens-host');
+    const card = host && host.shadowRoot && host.shadowRoot.querySelector('.kl-card');
+    return !!(card && card.querySelector('.kl-kheng'));
+  });
+
+  // Cycle alternates until the gloss-less match (which offers the button) shows.
+  let st = await popupState(page);
+  check('popup shows on hover', st.visible, st.word);
+  let btnShown = await hasKhengBtn();
+  for (let i = 0; i < 5 && !btnShown; i++) {
+    await page.keyboard.press('Shift');
+    await page.waitForTimeout(150);
+    btnShown = await hasKhengBtn();
+  }
+  check('K kheng.info button appears for a gloss-less match', btnShown);
+  const word = (await popupState(page)).word;
+
+  // Feed the service-worker stub the saved hit fixture, then click the button.
+  const hitHtml = fs.readFileSync(
+    path.join(__dirname, 'fixtures', 'pages', 'kheng-hit.html'), 'utf8');
+  await page.evaluate((html) => { window.__khengHtml = html; }, hitHtml);
+
+  await page.click('.kl-kheng');
+  await page.waitForTimeout(300);
+  st = await popupState(page);
+  check('fetched kheng.info definition renders in the popup',
+    !!st.gloss && /happy/.test(st.gloss), st.gloss && st.gloss.slice(0, 50));
+  check('the queried word was sent to the lookup bridge',
+    (await page.evaluate(() => window.__khengQueries || [])).includes(word));
+
+  // The popup is still on the gloss-less match with fetched senses; adding it
+  // to Anki should carry those senses, not a blank definition.
+  await page.click('.kl-anki');
+  await page.waitForTimeout(200);
+  const adds = await page.evaluate(() => window.__ankiAdds || []);
+  const last = adds[adds.length - 1];
+  check('Anki card uses the fetched kheng.info senses',
+    !!last && last.senses.length > 0 && /happy/.test(last.senses[0][2]),
+    last && JSON.stringify(last).slice(0, 80));
+
+  // Turning the feature off removes the affordance (re-hover; first match again).
+  await page.evaluate(() =>
+    new Promise((r) => chrome.storage.sync.set({ khengEnabled: false }, r)));
+  await page.evaluate(() => {
+    window.KhmerLensTest.setEnabled(false);
+    window.KhmerLensTest.setEnabled(true);
+  });
+  await page.mouse.move(pt.x, pt.y);
+  await page.waitForTimeout(300);
+  let offBtn = await hasKhengBtn();
+  for (let i = 0; i < 5 && !offBtn; i++) {
+    await page.keyboard.press('Shift');
+    await page.waitForTimeout(150);
+    offBtn = await hasKhengBtn();
+  }
+  check('no K button when the feature is disabled', !offBtn);
+
+  await browser.close();
+  await server.close();
+}
+
 (async () => {
   console.log('— Part A: content-script integration —');
   await partA();
@@ -430,6 +529,7 @@ async function partD() {
   await partB();
   await partC();
   await partD();
+  await partE();
   console.log(failures ? `\n${failures} FAILURES` : '\nAll browser checks passed.');
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });

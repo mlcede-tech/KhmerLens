@@ -15,6 +15,7 @@
 'use strict';
 
 importScripts('lib/anki.js');
+importScripts('lib/kheng.js');
 
 var CONTENT_FILES = [
   'lib/khmer.js',
@@ -22,6 +23,7 @@ var CONTENT_FILES = [
   'lib/popup.js',
   'lib/audio.js',
   'lib/anki.js',
+  'lib/kheng.js',
   'content/panel.js',
   'content/content.js',
 ];
@@ -59,6 +61,23 @@ async function ankiAdd(entry) {
     return { ok: true, noteId: data.result };
   } catch (e) {
     return { ok: false, status: KhmerLensAnki.classifyError(e && e.message), message: String(e) };
+  }
+}
+
+/**
+ * Fetch a word's definition page from kheng.info. Runs here because content
+ * scripts hit page CORS; the worker's optional host permission bypasses it.
+ */
+async function khengLookup(word) {
+  var granted = await chrome.permissions.contains({ origins: ['https://kheng.info/*'] });
+  if (!granted) return { ok: false, status: 'no-permission' };
+
+  try {
+    var resp = await fetch(KhmerLensKheng.searchUrl(word));
+    if (!resp.ok) return { ok: false, status: 'unreachable' };
+    return { ok: true, html: await resp.text() };
+  } catch (e) {
+    return { ok: false, status: 'unreachable' };
   }
 }
 
@@ -180,6 +199,11 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
   if (msg && msg.type === 'khmerlens:ankiAdd' && msg.entry) {
     ankiAdd(msg.entry).then(sendResponse);
+    return true; // async response
+  }
+
+  if (msg && msg.type === 'khmerlens:khengLookup' && msg.word) {
+    khengLookup(msg.word).then(sendResponse);
     return true; // async response
   }
 });

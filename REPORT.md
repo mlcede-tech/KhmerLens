@@ -60,8 +60,11 @@ Two full build→test→browser→self-review cycles, as required:
 2. **Gloss coverage is intermediate-learner grade, not exhaustive.**
    9,420 glossed words covers common vocabulary well (87% of probed
    positions), but technical news vocabulary, names, and newer loanwords
-   often fall into the gloss-less bucket. No Khmer-Khmer definitions
-   (Headley/kheng.info data is not redistributable — external link only).
+   often fall into the gloss-less bucket. No Khmer-Khmer definitions are
+   bundled (Headley/kheng.info data is not redistributable). An opt-in,
+   off-by-default on-demand kheng.info lookup now fills gloss-less words
+   one at a time on user click (see v2 candidates); nothing is bundled or
+   redistributed — the external link remains for everything else.
 3. **Romanization is inconsistent in style** across Wiktionary entries
    (about 16% of glossed entries have none at all).
 4. **Not reachable**: text in closed shadow roots, `<input>`/`<textarea>`
@@ -80,5 +83,8 @@ Two full build→test→browser→self-review cycles, as required:
 4. Multi-node matching so words spanning inline elements (`<b>`,
    links) match across boundaries; `nextWord` across nodes.
 5. Khmer→Khmer definitions if a redistributable source appears; more
-   glosses by merging other CC-licensed lexicons.
+   glosses by merging other CC-licensed lexicons. **Implemented (opt-in):**
+   on-demand kheng.info lookup for gloss-less words — off by default,
+   permission-gated (`https://kheng.info/*`), one word per user click/**K**
+   key, cached briefly on-device, nothing bundled or redistributed.
 6. Popup pinning (click to keep open) and in-popup sub-word lookups.
