@@ -259,6 +259,10 @@ function paintAnki() {
   ankiUI.config.hidden = !state.ankiEnabled;
   ankiUI.url.value = state.ankiUrl;
   ankiUI.tags.value = state.ankiTags;
+  // Show the saved deck/model right away, before AnkiConnect is reachable,
+  // so the page doesn't look like it forgot them while waiting to reconnect.
+  if (state.ankiDeck) fillSelect(ankiUI.deck, [state.ankiDeck], state.ankiDeck);
+  if (state.ankiModel) fillSelect(ankiUI.model, [state.ankiModel], state.ankiModel);
   if (ankiUI.origin && typeof chrome !== 'undefined' && chrome.runtime) {
     ankiUI.origin.textContent = 'chrome-extension://' + chrome.runtime.id;
   }
@@ -305,6 +309,7 @@ ankiUI.deck.addEventListener('change', function () {
 ankiUI.model.addEventListener('change', function () {
   state.ankiModel = ankiUI.model.value;
   state.ankiFieldMap = {};
+  save();
   loadModelFields();
 });
 
