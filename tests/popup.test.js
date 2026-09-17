@@ -47,3 +47,26 @@ test('popup never leaves viewport even when popup is huge', () => {
   });
   assert.ok(p.top >= 8);
 });
+
+test('word-anchored popup drops below the whole line, not over the next word', () => {
+  const wordRect = { left: 100, top: 100, right: 160, bottom: 120 };
+  const p = positionPopup({ ...base, cursorX: 130, cursorY: 110, wordRect });
+  assert.strictEqual(p.placement, 'below-right');
+  assert.strictEqual(p.left, wordRect.left);   // straight down from the word
+  assert.ok(p.top >= wordRect.bottom);         // clears the line it sits on
+});
+
+test('word-anchored popup flips above the line near the bottom edge', () => {
+  const wordRect = { left: 100, top: 760, right: 160, bottom: 780 };
+  const p = positionPopup({ ...base, cursorX: 130, cursorY: 770, wordRect });
+  assert.ok(p.placement.startsWith('above'));
+  assert.ok(p.top + base.popupH <= wordRect.top); // sits above the word line
+});
+
+test('word-anchored popup shifts left to fit near the right edge', () => {
+  const wordRect = { left: 1200, top: 100, right: 1260, bottom: 120 };
+  const p = positionPopup({ ...base, cursorX: 1230, cursorY: 110, wordRect });
+  assert.strictEqual(p.placement, 'below-left');
+  assert.ok(p.left + base.popupW <= base.viewportW);
+  assert.ok(p.top >= wordRect.bottom);            // still below the line
+});
