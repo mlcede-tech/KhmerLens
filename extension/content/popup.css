@@ -237,6 +237,21 @@
   color: var(--kl-muted);
 }
 
+/* Frozen (F): the card is held in place so the cursor can move onto it and
+   click. An accent ring makes the held state obvious beyond the button label. */
+.kl-card.kl-frozen {
+  border-color: var(--kl-accent);
+  box-shadow: 0 0 0 2px var(--kl-accent), var(--kl-shadow);
+}
+
+.kl-act.kl-freeze.kl-on,
+.kl-act.kl-freeze.kl-on:hover {
+  background: var(--kl-chip-bg);
+  color: var(--kl-accent);
+  border-color: var(--kl-accent);
+  font-weight: 600;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .kl-card {
     transition: none;

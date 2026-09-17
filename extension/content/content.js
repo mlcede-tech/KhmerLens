@@ -38,6 +38,7 @@
   var shadow = null;
   var card = null;
   var visible = false;
+  var frozen = false;     // F toggle: hold the card still so it can be clicked
   var current = null;     // {matches, index, node, cursorX, cursorY}
   var hoverTimer = 0;
   var lastMouse = { x: -1, y: -1 };
@@ -308,6 +309,7 @@
     var fromKheng = false;
     if (!senses.length && m.khengSenses) { senses = m.khengSenses; fromKheng = true; }
     card.textContent = '';
+    card.classList.toggle('kl-frozen', frozen);
 
     var head = el('div', 'kl-head');
     head.appendChild(el('span', 'kl-word', m.word));
@@ -426,6 +428,19 @@
     });
     actions.appendChild(nextBtn);
 
+    var freezeBtn = el('button', 'kl-act kl-freeze' + (frozen ? ' kl-on' : ''),
+      frozen ? 'F Unfreeze' : 'F Freeze');
+    freezeBtn.type = 'button';
+    freezeBtn.title = frozen
+      ? 'Let the popup follow the cursor again (F)'
+      : 'Freeze the popup in place so you can click it (F)';
+    freezeBtn.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      frozen = !frozen;
+      renderPopup();
+    });
+    actions.appendChild(freezeBtn);
+
     if (settings.ankiEnabled) {
       var anki = el('button', 'kl-act kl-anki', 'A Anki');
       anki.type = 'button';
@@ -456,6 +471,7 @@
     var rect = card.getBoundingClientRect();
     var pos = popupMath.positionPopup({
       cursorX: x, cursorY: y,
+      wordRect: (current && current.wordRect) ? current.wordRect : null,
       popupW: rect.width, popupH: rect.height,
       viewportW: window.innerWidth, viewportH: window.innerHeight,
     });
@@ -485,9 +501,19 @@
     return x >= left && x <= right && y >= top && y <= bottom;
   }
 
+  // Called from lookupAt when nothing translatable is under the cursor. If the
+  // cursor is resting in the safe zone — the word→popup gap, e.g. on the way to
+  // the kheng.info link or an action button — keep the popup so it doesn't
+  // vanish mid-reach. Anywhere else, hide it as usual.
+  function hideUnlessSafe(x, y) {
+    if (visible && inSafeZone(x, y)) return;
+    hidePopup();
+  }
+
   function hidePopup() {
     if (!visible) return;
     visible = false;
+    frozen = false;
     current = null;
     if (card) card.classList.add('kl-hidden');
     clearHighlight();
@@ -538,12 +564,12 @@
   function lookupAt(x, y) {
     var caret = caretAt(x, y);
     if (!caret || !caret.node || caret.node.nodeType !== Node.TEXT_NODE) {
-      hidePopup();
+      hideUnlessSafe(x, y);
       return;
     }
     var text = caret.node.data;
     var offset = Math.min(caret.offset, text.length - 1);
-    if (offset < 0) { hidePopup(); return; }
+    if (offset < 0) { hideUnlessSafe(x, y); return; }
 
     // caret can land just past the hovered char; also check offset-1
     var probe = offset;
@@ -551,7 +577,7 @@
         core.isKhmerLetter(text[probe - 1])) {
       probe = offset - 1;
     }
-    if (!core.isKhmerLetter(text[probe])) { hidePopup(); return; }
+    if (!core.isKhmerLetter(text[probe])) { hideUnlessSafe(x, y); return; }
 
     var matches = core.findMatches(text, probe, dict.has.bind(dict), dict.maxWordLen)
       .filter(function (m) {
@@ -573,7 +599,7 @@
       var fb = core.icuFallback(text, probe);
       if (fb) matches = [fb];
     }
-    if (!matches.length) { hidePopup(); return; }
+    if (!matches.length) { hideUnlessSafe(x, y); return; }
 
     // avoid re-render if same match under cursor
     var m0 = matches[0];
@@ -604,13 +630,15 @@
   // ---------------------------------------------------------------- events
   function onMouseMove(ev) {
     if (!enabled) return;
+    // while frozen (F) the card is held in place so it can be moved onto and
+    // clicked; ignore every hover-driven move until the user unfreezes
+    if (frozen) return;
     // ignore moves over our own popup (e.g. reaching for the kheng.info
     // link) so the popup doesn't hide or re-render underneath the cursor
     if (host && (ev.target === host || host.contains(ev.target))) return;
-    // also ignore moves in the gap between the hovered word and the popup —
-    // otherwise the cursor's path there keeps re-triggering lookups that
-    // reposition (or hide) the popup before it can be reached
-    if (visible && inSafeZone(ev.clientX, ev.clientY)) return;
+    // Note: a word covered by (or beside) the popup is still looked up — the
+    // safe zone no longer suppresses lookups here; it only keeps the popup from
+    // vanishing over an *empty* gap, handled in lookupAt via hideUnlessSafe.
     lastMouse.x = ev.clientX;
     lastMouse.y = ev.clientY;
     if (hoverTimer) clearTimeout(hoverTimer);
@@ -654,6 +682,12 @@
     }
     if (ev.key === 'c' && !ev.metaKey && !ev.ctrlKey && !ev.altKey) {
       copyCurrent();
+      ev.preventDefault();
+      return;
+    }
+    if (ev.key === 'f' && !ev.metaKey && !ev.ctrlKey && !ev.altKey) {
+      frozen = !frozen;
+      renderPopup();
       ev.preventDefault();
       return;
     }
