@@ -408,6 +408,15 @@
     });
     actions.appendChild(copyBtn);
 
+    var prevBtn = el('button', 'kl-act kl-prev', 'B Back');
+    prevBtn.type = 'button';
+    prevBtn.title = 'Jump to previous dictionary word (B)';
+    prevBtn.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      prevWord();
+    });
+    actions.appendChild(prevBtn);
+
     var nextBtn = el('button', 'kl-act kl-next', 'N Next');
     nextBtn.type = 'button';
     nextBtn.title = 'Jump to next dictionary word (N)';
@@ -653,6 +662,11 @@
       ev.preventDefault();
       return;
     }
+    if (ev.key === 'b' && !ev.metaKey && !ev.ctrlKey && !ev.altKey) {
+      prevWord();
+      ev.preventDefault();
+      return;
+    }
     if (ev.key === 's' && !ev.metaKey && !ev.ctrlKey && !ev.altKey) {
       speakCurrent();
       ev.preventDefault();
@@ -760,6 +774,48 @@
       }
     }
     flashFoot('End of text');
+  }
+
+  /** Jump the popup to the previous dictionary word before the current match. */
+  function prevWord() {
+    var m = current.matches[current.index];
+    var node = current.node;
+    var text = node.data;
+    for (var i = m.start - 1; i >= 0; i--) {
+      if (core.isKhmerLetter(text[i])) {
+        var matches = core.findMatches(text, i, dict.has.bind(dict), dict.maxWordLen);
+        if (matches.length) {
+          // findMatches ranks matches starting at i first, but we want the
+          // word ending closest to (and not past) the current word's start —
+          // i.e. the one immediately before it, not whatever starts at i.
+          // On a tie, prefer the longer match, same as a fresh hover would.
+          var best = null;
+          matches.forEach(function (cand) {
+            if (cand.end > m.start) return;
+            if (!best || cand.end > best.end ||
+                (cand.end === best.end && cand.start < best.start)) {
+              best = cand;
+            }
+          });
+          if (!best) best = matches[0];
+          var bestIndex = matches.indexOf(best);
+          var range = new Range();
+          range.setStart(node, best.start);
+          range.setEnd(node, best.end);
+          var r = range.getBoundingClientRect();
+          current = {
+            matches: matches, index: bestIndex < 0 ? 0 : bestIndex, node: node,
+            cursorX: r.left, cursorY: r.bottom,
+            wordRect: r, popupRect: null,
+          };
+          renderPopup();
+          showPopupAt(r.left, r.bottom);
+          setHighlight(node, best.start, best.end);
+          return;
+        }
+      }
+    }
+    flashFoot('Start of text');
   }
 
   function onScrollOrResize() {

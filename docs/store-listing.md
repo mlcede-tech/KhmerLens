@@ -40,14 +40,14 @@ Hover over any Khmer word on any webpage, and a popup appears instantly with:
 - **Zero tracking** — We collect zero data. No analytics, no network requests, no tracking.
 - **Smart segmentation** — Khmer has no spaces. KhmerLens uses dictionary-aware segmentation to find words accurately, even in long strings.
 - **Customizable** — Choose light/dark theme, adjust font size, toggle romanization, and toggle on-page highlighting.
-- **Keyboard shortcuts** — Shift to cycle matches, c to copy, n to jump to next word, Esc to hide.
+- **Keyboard shortcuts** — Shift to cycle matches, c to copy, n to jump to next word, b to jump back, Esc to hide.
 
 **Getting Started**
 
 1. Click the toolbar icon to open the popup, then flip the switch ON (or press Alt+K, which toggles the tab directly) — badge shows "ON" when active
 2. Hover over any Khmer text
 3. Read the definition in the popup
-4. Use keyboard shortcuts (Shift, c, n, Esc) for faster interaction
+4. Use keyboard shortcuts (Shift, c, n, b, Esc) for faster interaction
 
 **Dictionary Stats**
 
