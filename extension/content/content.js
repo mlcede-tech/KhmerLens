@@ -433,7 +433,7 @@
     freezeBtn.type = 'button';
     freezeBtn.title = frozen
       ? 'Let the popup follow the cursor again (F)'
-      : 'Freeze the popup in place so you can click it (F)';
+      : 'Pin the popup in place — stays put while you scroll or switch apps (F)';
     freezeBtn.addEventListener('click', function (ev) {
       ev.stopPropagation();
       frozen = !frozen;
@@ -853,7 +853,17 @@
   }
 
   function onScrollOrResize() {
-    if (visible) hidePopup();
+    // A frozen card is pinned to the viewport (position:fixed) as a bookmark,
+    // so leave it put while the page scrolls or the window resizes.
+    if (visible && !frozen) hidePopup();
+  }
+
+  // The cursor leaving the page (e.g. switching to another window or app) hides
+  // the popup — unless it is frozen, in which case it stays pinned so it can be
+  // used as a bookmark while the user is away.
+  function onMouseLeave() {
+    if (frozen) return;
+    hidePopup();
   }
 
   // -------------------------------------------------------- enable/disable
@@ -873,13 +883,13 @@
       document.addEventListener('keydown', onKeyDown, true);
       window.addEventListener('scroll', onScrollOrResize, true);
       window.addEventListener('resize', onScrollOrResize);
-      document.addEventListener('mouseleave', hidePopup);
+      document.addEventListener('mouseleave', onMouseLeave);
     } else {
       document.removeEventListener('mousemove', onMouseMove, true);
       document.removeEventListener('keydown', onKeyDown, true);
       window.removeEventListener('scroll', onScrollOrResize, true);
       window.removeEventListener('resize', onScrollOrResize);
-      document.removeEventListener('mouseleave', hidePopup);
+      document.removeEventListener('mouseleave', onMouseLeave);
       hidePopup();
       try { if (globalThis.KhmerLensPanel) globalThis.KhmerLensPanel.close(); } catch (e) { console.debug('KhmerLens panel:', e); }
     }
