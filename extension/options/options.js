@@ -366,6 +366,87 @@ khengToggle.addEventListener('change', function (e) {
   }
 });
 
+// --- tabs ---------------------------------------------------------------
+var TAB_NAMES = ['settings', 'help', 'quickstart'];
+var tabs = Array.prototype.slice.call(document.querySelectorAll('.tabbar [role="tab"]'));
+
+function showTab(name) {
+  if (TAB_NAMES.indexOf(name) === -1) name = 'settings';
+  tabs.forEach(function (tab) {
+    var on = tab.dataset.tab === name;
+    tab.setAttribute('aria-selected', on ? 'true' : 'false');
+    tab.tabIndex = on ? 0 : -1;
+    var panel = document.getElementById(tab.getAttribute('aria-controls'));
+    if (panel) panel.hidden = !on;
+  });
+  if (('#' + name) !== location.hash) {
+    history.replaceState(null, '', '#' + name);
+  }
+}
+
+tabs.forEach(function (tab, i) {
+  tab.addEventListener('click', function () { showTab(tab.dataset.tab); });
+  tab.addEventListener('keydown', function (ev) {
+    var dir = ev.key === 'ArrowRight' ? 1 : ev.key === 'ArrowLeft' ? -1 : 0;
+    if (!dir) return;
+    ev.preventDefault();
+    var next = tabs[(i + dir + tabs.length) % tabs.length];
+    showTab(next.dataset.tab);
+    next.focus();
+  });
+});
+
+// jump buttons inside the wizard ("Open Settings", "Read the FAQ")
+document.querySelectorAll('[data-goto]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    showTab(btn.dataset.goto);
+    var target = document.querySelector('.tabbar [data-tab="' + btn.dataset.goto + '"]');
+    if (target) target.focus();
+    window.scrollTo({ top: 0 });
+  });
+});
+
+// --- quick start wizard -------------------------------------------------
+var stepCards = Array.prototype.slice.call(document.querySelectorAll('.steps-rail .step-card'));
+var wizPrev = document.getElementById('wiz-prev');
+var wizNext = document.getElementById('wiz-next');
+var currentStep = 1;
+
+function showStep(n) {
+  currentStep = Math.min(Math.max(n, 1), stepCards.length);
+  stepCards.forEach(function (card) {
+    var on = Number(card.dataset.step) === currentStep;
+    card.setAttribute('aria-selected', on ? 'true' : 'false');
+    card.tabIndex = on ? 0 : -1;
+    var body = document.getElementById(card.getAttribute('aria-controls'));
+    if (body) body.hidden = !on;
+  });
+  wizPrev.disabled = currentStep === 1;
+  wizNext.disabled = currentStep === stepCards.length;
+}
+
+stepCards.forEach(function (card, i) {
+  card.addEventListener('click', function () { showStep(Number(card.dataset.step)); });
+  card.addEventListener('keydown', function (ev) {
+    var dir = ev.key === 'ArrowRight' ? 1 : ev.key === 'ArrowLeft' ? -1 : 0;
+    if (!dir) return;
+    ev.preventDefault();
+    var next = stepCards[(i + dir + stepCards.length) % stepCards.length];
+    showStep(Number(next.dataset.step));
+    next.focus();
+  });
+});
+
+wizPrev.addEventListener('click', function () { showStep(currentStep - 1); });
+wizNext.addEventListener('click', function () { showStep(currentStep + 1); });
+showStep(1);
+
+// open the tab named in the URL hash (deep link), defaulting to Settings
+showTab((location.hash || '').replace('#', '') || 'settings');
+window.addEventListener('hashchange', function () {
+  showTab((location.hash || '').replace('#', '') || 'settings');
+});
+
 // react to system theme changes while 'auto' is selected
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
   if (state.theme === 'auto') renderPreview();
