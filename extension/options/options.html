@@ -13,182 +13,357 @@
         <h1>KhmerLens</h1>
         <p class="tagline">Khmer hover dictionary</p>
       </div>
+      <p class="status-chip" title="No analytics, no tracking, no network requests.">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span><strong>Works offline</strong><br>No data collected</span>
+      </p>
     </header>
 
-    <!-- Live preview + controls -->
-    <section class="tuner" aria-label="Popup appearance">
-      <div class="preview-wrap">
-        <p class="preview-caption">Live preview</p>
-        <!-- Faithful mini-render of the lookup popup; JS toggles classes -->
-        <div class="kl-preview kl-fs-medium" id="preview">
-          <div class="kl-head">
-            <span class="kl-word">ភ្នំពេញ</span>
-            <span class="kl-freq">common</span>
-          </div>
-          <p class="kl-roman" id="preview-roman">phnum pɨñ</p>
-          <div class="kl-body">
-            <div class="kl-sense">
-              <span class="kl-pos">noun</span>
-              <span class="kl-gloss">Phnom Penh (the capital of Cambodia)</span>
+    <nav class="tabbar" role="tablist" aria-label="Options sections">
+      <button type="button" role="tab" id="tab-settings" aria-controls="panel-settings" data-tab="settings">
+        <span class="tab-ico" aria-hidden="true">⚙</span> Settings
+      </button>
+      <button type="button" role="tab" id="tab-help" aria-controls="panel-help" data-tab="help">
+        <span class="tab-ico" aria-hidden="true">?</span> Help &amp; FAQ
+      </button>
+      <button type="button" role="tab" id="tab-quickstart" aria-controls="panel-quickstart" data-tab="quickstart">
+        <span class="tab-ico" aria-hidden="true">◈</span> Quick Start
+      </button>
+    </nav>
+
+    <!-- ============================================================ SETTINGS -->
+    <div class="tabpanel" role="tabpanel" id="panel-settings" aria-labelledby="tab-settings" tabindex="0">
+
+      <!-- Live preview + appearance controls -->
+      <section class="card" aria-label="Popup appearance">
+        <div class="card-head">
+          <h2>Appearance</h2>
+          <p class="card-sub">How the lookup popup looks. Changes save automatically.</p>
+        </div>
+        <div class="tuner">
+          <div class="preview-wrap">
+            <p class="preview-caption">Live preview</p>
+            <!-- Faithful mini-render of the lookup popup; JS toggles classes -->
+            <div class="kl-preview kl-fs-medium" id="preview">
+              <div class="kl-head">
+                <span class="kl-word">ភ្នំពេញ</span>
+                <span class="kl-freq">common</span>
+              </div>
+              <p class="kl-roman" id="preview-roman">phnum pɨñ</p>
+              <div class="kl-body">
+                <div class="kl-sense">
+                  <span class="kl-pos">noun</span>
+                  <span class="kl-gloss">Phnom Penh (the capital of Cambodia)</span>
+                </div>
+              </div>
+              <div class="kl-foot">
+                <span class="kl-link">kheng.info ↗</span>
+                <span class="kl-keys">⇧ alts · C copy</span>
+              </div>
             </div>
           </div>
-          <div class="kl-foot">
-            <span class="kl-link">kheng.info ↗</span>
-            <span class="kl-keys">⇧ alts · C copy</span>
+
+          <div class="controls">
+            <div class="field">
+              <label class="field-label" id="theme-label">Theme</label>
+              <div class="segmented" role="radiogroup" aria-labelledby="theme-label" data-name="theme">
+                <button type="button" role="radio" data-value="light">Light</button>
+                <button type="button" role="radio" data-value="dark">Dark</button>
+                <button type="button" role="radio" data-value="auto">Auto</button>
+                <span class="thumb" aria-hidden="true"></span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label" id="fontsize-label">Font size</label>
+              <div class="segmented" role="radiogroup" aria-labelledby="fontsize-label" data-name="fontSize">
+                <button type="button" role="radio" data-value="small">Small</button>
+                <button type="button" role="radio" data-value="medium">Medium</button>
+                <button type="button" role="radio" data-value="large">Large</button>
+                <span class="thumb" aria-hidden="true"></span>
+              </div>
+            </div>
+
+            <div class="field field-row">
+              <div>
+                <label class="field-label" for="showRoman">Romanization</label>
+                <p class="field-help">Show phonetic transcription under the word</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="showRoman">
+                <span class="track" aria-hidden="true"><span class="knob"></span></span>
+              </label>
+            </div>
+
+            <div class="field field-row">
+              <div>
+                <label class="field-label" for="highlight">Highlight on page</label>
+                <p class="field-help">Underlay the matched word while the popup shows</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="highlight">
+                <span class="track" aria-hidden="true"><span class="knob"></span></span>
+              </label>
+            </div>
+
+            <p class="saved" id="saved" role="status">Saved</p>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="controls">
-        <div class="field">
-          <label class="field-label" id="theme-label">Theme</label>
-          <div class="segmented" role="radiogroup" aria-labelledby="theme-label" data-name="theme">
-            <button type="button" role="radio" data-value="light">Light</button>
-            <button type="button" role="radio" data-value="dark">Dark</button>
-            <button type="button" role="radio" data-value="auto">Auto</button>
-            <span class="thumb" aria-hidden="true"></span>
-          </div>
+      <!-- Anki integration -->
+      <section class="card" id="anki-section">
+        <div class="card-head">
+          <h2>Anki integration</h2>
+          <p class="card-sub">Send words you look up straight to your flashcard decks.</p>
         </div>
-
-        <div class="field">
-          <label class="field-label" id="fontsize-label">Font size</label>
-          <div class="segmented" role="radiogroup" aria-labelledby="fontsize-label" data-name="fontSize">
-            <button type="button" role="radio" data-value="small">Small</button>
-            <button type="button" role="radio" data-value="medium">Medium</button>
-            <button type="button" role="radio" data-value="large">Large</button>
-            <span class="thumb" aria-hidden="true"></span>
-          </div>
-        </div>
-
         <div class="field field-row">
           <div>
-            <label class="field-label" for="showRoman">Romanization</label>
-            <p class="field-help">Show phonetic transcription under the word</p>
+            <label class="field-label" for="ankiEnabled">Add words to Anki</label>
+            <p class="field-help">Shows a ★ Anki button in the popup (shortcut <kbd>A</kbd>). Requires the Anki desktop app running with the <a href="https://ankiweb.net/shared/info/2055492159" target="_blank" rel="noopener">AnkiConnect</a> add-on.</p>
           </div>
           <label class="switch">
-            <input type="checkbox" id="showRoman">
+            <input type="checkbox" id="ankiEnabled">
             <span class="track" aria-hidden="true"><span class="knob"></span></span>
           </label>
         </div>
 
+        <div id="anki-config" hidden>
+          <div class="field">
+            <label class="field-label" for="ankiUrl">AnkiConnect address</label>
+            <div class="anki-row">
+              <input type="text" id="ankiUrl" spellcheck="false">
+              <button type="button" class="anki-btn" id="anki-connect">Connect</button>
+            </div>
+            <p class="field-help anki-status" id="anki-status" role="status"></p>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="ankiDeck">Deck</label>
+            <select id="ankiDeck" disabled></select>
+            <p class="field-help">Words are added as new notes to this existing deck.</p>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="ankiModel">Note type</label>
+            <select id="ankiModel" disabled></select>
+          </div>
+
+          <div class="field">
+            <span class="field-label">Field mapping</span>
+            <div id="anki-fields" class="anki-fields"></div>
+            <p class="field-help">Choose what KhmerLens writes into each field of the note type.</p>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="ankiTags">Tags</label>
+            <input type="text" id="ankiTags" spellcheck="false">
+            <p class="field-help">Space- or comma-separated tags added to every note.</p>
+          </div>
+
+          <details class="anki-help">
+            <summary>Connection troubleshooting</summary>
+            <ol class="steps">
+              <li>In Anki: Tools → Add-ons → Get Add-ons → code <code>2055492159</code>, then restart Anki.</li>
+              <li>If connecting still fails, open Tools → Add-ons → AnkiConnect → Config and add this extension's origin to <code>webCorsOriginList</code>: <code id="anki-origin"></code></li>
+              <li>Keep Anki open while adding words.</li>
+            </ol>
+          </details>
+        </div>
+      </section>
+
+      <!-- kheng.info live lookup -->
+      <section class="card" id="kheng-section">
+        <div class="card-head">
+          <h2>Online definitions</h2>
+          <p class="card-sub">A fallback for words the offline dictionary doesn't cover.</p>
+        </div>
         <div class="field field-row">
           <div>
-            <label class="field-label" for="highlight">Highlight on page</label>
-            <p class="field-help">Underlay the matched word while the popup shows</p>
+            <label class="field-label" for="khengEnabled">Look up missing definitions on kheng.info</label>
+            <p class="field-help">When a word has no bundled definition, sends that single word to <a href="https://kheng.info/" target="_blank" rel="noopener">kheng.info</a> to fetch one (only when you click the lookup button, or press <kbd>K</kbd>).</p>
           </div>
           <label class="switch">
-            <input type="checkbox" id="highlight">
+            <input type="checkbox" id="khengEnabled">
             <span class="track" aria-hidden="true"><span class="knob"></span></span>
           </label>
         </div>
+      </section>
+    </div>
 
-        <p class="saved" id="saved" role="status">Saved</p>
-      </div>
-    </section>
+    <!-- ================================================================ HELP -->
+    <div class="tabpanel" role="tabpanel" id="panel-help" aria-labelledby="tab-help" tabindex="0" hidden>
 
-    <!-- Anki integration -->
-    <section class="ref" id="anki-section">
-      <h2>Anki integration</h2>
-      <div class="field field-row">
-        <div>
-          <label class="field-label" for="ankiEnabled">Add words to Anki</label>
-          <p class="field-help">Shows a ★ Anki button in the popup (shortcut <kbd>A</kbd>). Requires the Anki desktop app running with the <a href="https://ankiweb.net/shared/info/2055492159" target="_blank" rel="noopener">AnkiConnect</a> add-on.</p>
+      <section class="card">
+        <div class="card-head">
+          <h2>Getting started</h2>
         </div>
-        <label class="switch">
-          <input type="checkbox" id="ankiEnabled">
-          <span class="track" aria-hidden="true"><span class="knob"></span></span>
-        </label>
+        <ol class="steps">
+          <li>Click the KhmerLens toolbar icon to open the popup, then flip the switch to turn it on for the current tab — the badge shows <strong>ON</strong>.</li>
+          <li>Hover over any Khmer word and the popup appears with its definition.</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Keyboard shortcuts</h2>
+          <p class="card-sub">Available while a popup is showing.</p>
+        </div>
+        <dl class="shortcuts">
+          <div><dt><kbd>Alt</kbd><kbd>K</kbd></dt><dd>Toggle KhmerLens on the current tab <span class="dd-note">(rebind at chrome://extensions/shortcuts)</span></dd></div>
+          <div><dt><kbd>Shift</kbd></dt><dd>Cycle to shorter / alternative matches</dd></div>
+          <div><dt><kbd>C</kbd></dt><dd>Copy the word and definition</dd></div>
+          <div><dt><kbd>F</kbd></dt><dd>Freeze the popup so it stays put while you read</dd></div>
+          <div><dt><kbd>N</kbd></dt><dd>Jump to the next word</dd></div>
+          <div><dt><kbd>B</kbd></dt><dd>Jump back to the previous word</dd></div>
+          <div><dt><kbd>S</kbd></dt><dd>Play pronunciation <span class="dd-note">(bundled recording, or the system's Khmer voice if installed)</span></dd></div>
+          <div><dt><kbd>A</kbd></dt><dd>Add the word to Anki <span class="dd-note">(when Anki integration is enabled)</span></dd></div>
+          <div><dt><kbd>K</kbd></dt><dd>Look up the word on kheng.info <span class="dd-note">(when online definitions are enabled)</span></dd></div>
+          <div><dt><kbd>Esc</kbd></dt><dd>Hide the popup</dd></div>
+        </dl>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Frequently asked questions</h2>
+        </div>
+        <div class="faq">
+          <details>
+            <summary>Does KhmerLens work offline?</summary>
+            <p>Yes. All 21,514 words are built into the extension, so lookups happen entirely on your device with no internet connection. The only feature that ever touches the network is the optional kheng.info lookup, which is off by default.</p>
+          </details>
+          <details>
+            <summary>What data does KhmerLens collect?</summary>
+            <p>None. There is no analytics, no tracking, and no network requests. Your settings are stored locally on your device, and the words you look up are never recorded or sent anywhere.</p>
+          </details>
+          <details>
+            <summary>Why isn't a word being found or highlighted?</summary>
+            <p>Khmer has no spaces between words, so KhmerLens segments text using its dictionary. If a word isn't recognized it may be spelled unusually, be a name, or fall outside the bundled dictionary. Press <kbd>Shift</kbd> to cycle to shorter or alternative matches under the cursor.</p>
+          </details>
+          <details>
+            <summary>How do I change the Alt+K shortcut?</summary>
+            <p>Open <code>chrome://extensions/shortcuts</code> in your address bar and rebind “Toggle KhmerLens on the current tab” to any key combination you prefer.</p>
+          </details>
+          <details>
+            <summary>Why won't the pronunciation play?</summary>
+            <p>KhmerLens plays a bundled recording when one exists for that word. If there's no recording, it falls back to your system's Khmer text-to-speech voice — which only works if a Khmer voice is installed on your device. Press <kbd>S</kbd> to play.</p>
+          </details>
+          <details>
+            <summary>How do I add words to Anki?</summary>
+            <p>Enable <strong>Anki integration</strong> on the Settings tab. It needs the Anki desktop app running with the free AnkiConnect add-on. Once connected, pick a deck and note type, then press <kbd>A</kbd> (or the ★ button) in the popup to add the current word.</p>
+          </details>
+          <details>
+            <summary>What is the kheng.info lookup?</summary>
+            <p>An opt-in fallback for words the offline dictionary doesn't cover. When enabled, pressing <kbd>K</kbd> (or the lookup button) sends only that single word to kheng.info to fetch a definition. Nothing is sent unless you ask for it.</p>
+          </details>
+          <details>
+            <summary>Why is kheng.info needed at all?</summary>
+            <p>The bundled dictionary is built only from openly-licensed sources, so rarer words fall outside it. kheng.info has much broader coverage but isn't open source, so its data can't be shipped inside the extension — the optional, on-demand lookup is the way to reach it.</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>About &amp; attribution</h2>
+        </div>
+        <p>KhmerLens works fully offline and collects no data. Dictionary compiled from:</p>
+        <ul class="sources">
+          <li><a href="https://kaikki.org/dictionary/Khmer/" target="_blank" rel="noopener">Wiktionary, via kaikki.org</a> — CC BY-SA 4.0. The bundled dictionary is likewise available under CC BY-SA 4.0.</li>
+          <li><a href="https://github.com/silnrsi/khmerlbdict" target="_blank" rel="noopener">SIL khmerlbdict</a> frequency wordlist — MIT License, © 2015 SIL NRSI.</li>
+          <li>Pronunciation recordings from <a href="https://commons.wikimedia.org/wiki/Category:Khmer_pronunciation" target="_blank" rel="noopener">Wikimedia Commons</a> and <a href="https://lingualibre.org/" target="_blank" rel="noopener">Lingua Libre</a> contributors — CC BY-SA 4.0 (per-file credits in ATTRIBUTION.md).</li>
+        </ul>
+        <p class="colophon">Inspired by the <a href="https://github.com/cschiller/zhongwen" target="_blank" rel="noopener">Zhongwen</a> popup dictionary for Chinese.</p>
+      </section>
+    </div>
+
+    <!-- ========================================================== QUICK START -->
+    <div class="tabpanel" role="tabpanel" id="panel-quickstart" aria-labelledby="tab-quickstart" tabindex="0" hidden>
+
+      <div class="wizard-intro">
+        <h2>Quick Start</h2>
+        <p>Four short steps to get reading Khmer with KhmerLens. Come back any time.</p>
       </div>
 
-      <div id="anki-config" hidden>
-        <div class="field">
-          <label class="field-label" for="ankiUrl">AnkiConnect address</label>
-          <div class="anki-row">
-            <input type="text" id="ankiUrl" spellcheck="false">
-            <button type="button" class="anki-btn" id="anki-connect">Connect</button>
+      <div class="steps-rail" role="tablist" aria-label="Quick start steps">
+        <button type="button" role="tab" class="step-card" id="step-1" aria-controls="stepbody-1" data-step="1">
+          <span class="step-num">1</span>
+          <span class="step-text"><strong>Turn it on</strong><span>Activate the current tab</span></span>
+        </button>
+        <button type="button" role="tab" class="step-card" id="step-2" aria-controls="stepbody-2" data-step="2">
+          <span class="step-num">2</span>
+          <span class="step-text"><strong>Hover to look up</strong><span>Point at any Khmer word</span></span>
+        </button>
+        <button type="button" role="tab" class="step-card" id="step-3" aria-controls="stepbody-3" data-step="3">
+          <span class="step-num">3</span>
+          <span class="step-text"><strong>Style the popup</strong><span>Make it yours</span></span>
+        </button>
+        <button type="button" role="tab" class="step-card" id="step-4" aria-controls="stepbody-4" data-step="4">
+          <span class="step-num">4</span>
+          <span class="step-text"><strong>Optional extras</strong><span>Anki, sound &amp; more</span></span>
+        </button>
+      </div>
+
+      <section class="card wizard-body">
+        <div class="step-body" role="tabpanel" id="stepbody-1" aria-labelledby="step-1">
+          <div class="card-head">
+            <h3>Turn KhmerLens on</h3>
+            <p class="card-sub">KhmerLens stays off until you switch it on for a tab — nothing runs in the background.</p>
           </div>
-          <p class="field-help anki-status" id="anki-status" role="status"></p>
-        </div>
-
-        <div class="field">
-          <label class="field-label" for="ankiDeck">Deck</label>
-          <select id="ankiDeck" disabled></select>
-          <p class="field-help">Words are added as new notes to this existing deck.</p>
-        </div>
-
-        <div class="field">
-          <label class="field-label" for="ankiModel">Note type</label>
-          <select id="ankiModel" disabled></select>
-        </div>
-
-        <div class="field">
-          <span class="field-label">Field mapping</span>
-          <div id="anki-fields" class="anki-fields"></div>
-          <p class="field-help">Choose what KhmerLens writes into each field of the note type.</p>
-        </div>
-
-        <div class="field">
-          <label class="field-label" for="ankiTags">Tags</label>
-          <input type="text" id="ankiTags" spellcheck="false">
-          <p class="field-help">Space- or comma-separated tags added to every note.</p>
-        </div>
-
-        <details class="anki-help">
-          <summary>Connection troubleshooting</summary>
           <ol class="steps">
-            <li>In Anki: Tools → Add-ons → Get Add-ons → code <code>2055492159</code>, then restart Anki.</li>
-            <li>If connecting still fails, open Tools → Add-ons → AnkiConnect → Config and add this extension's origin to <code>webCorsOriginList</code>: <code id="anki-origin"></code></li>
-            <li>Keep Anki open while adding words.</li>
+            <li>Click the KhmerLens icon in your browser toolbar to open the popup.</li>
+            <li>Flip the switch to <strong>On</strong> — or just press <kbd>Alt</kbd><kbd>K</kbd> to toggle the tab directly.</li>
+            <li>The toolbar badge reads <strong>ON</strong> while it's active on that tab.</li>
           </ol>
-        </details>
-      </div>
-    </section>
-
-    <!-- kheng.info live lookup -->
-    <section class="ref" id="kheng-section">
-      <h2>Online definitions</h2>
-      <div class="field field-row">
-        <div>
-          <label class="field-label" for="khengEnabled">Look up missing definitions on kheng.info</label>
-          <p class="field-help">When a word has no bundled definition, sends that single word to <a href="https://kheng.info/" target="_blank" rel="noopener">kheng.info</a> to fetch one (only when you click the lookup button).</p>
         </div>
-        <label class="switch">
-          <input type="checkbox" id="khengEnabled">
-          <span class="track" aria-hidden="true"><span class="knob"></span></span>
-        </label>
-      </div>
-    </section>
 
-    <!-- Reference -->
-    <section class="ref">
-      <h2>Getting started</h2>
-      <ol class="steps">
-        <li>Click the KhmerLens toolbar icon to open the popup, then flip the switch to turn it on for the current tab — the badge shows <strong>ON</strong>.</li>
-        <li>Hover over any Khmer word and the popup appears with its definition.</li>
-      </ol>
+        <div class="step-body" role="tabpanel" id="stepbody-2" aria-labelledby="step-2" hidden>
+          <div class="card-head">
+            <h3>Hover to look up a word</h3>
+            <p class="card-sub">No clicking or typing — the definition follows your cursor.</p>
+          </div>
+          <ol class="steps">
+            <li>Move your cursor over any Khmer text on the page.</li>
+            <li>A popup appears with the word, romanization, part of speech, and English meaning.</li>
+            <li>Press <kbd>Shift</kbd> to cycle alternative matches, or <kbd>N</kbd> / <kbd>B</kbd> to step to the next or previous word.</li>
+          </ol>
+        </div>
 
-      <h3>Keyboard shortcuts</h3>
-      <dl class="shortcuts">
-        <div><dt><kbd>Alt</kbd><kbd>K</kbd></dt><dd>Toggle KhmerLens on the current tab <span class="dd-note">(rebind at chrome://extensions/shortcuts)</span></dd></div>
-        <div><dt><kbd>Shift</kbd></dt><dd>Cycle to shorter / alternative matches</dd></div>
-        <div><dt><kbd>C</kbd></dt><dd>Copy the word and definition</dd></div>
-        <div><dt><kbd>N</kbd></dt><dd>Jump to the next word</dd></div>
-        <div><dt><kbd>S</kbd></dt><dd>Play pronunciation <span class="dd-note">(bundled recording, or the system's Khmer voice if installed)</span></dd></div>
-        <div><dt><kbd>A</kbd></dt><dd>Add the word to Anki <span class="dd-note">(when Anki integration is enabled)</span></dd></div>
-        <div><dt><kbd>Esc</kbd></dt><dd>Hide the popup</dd></div>
-      </dl>
-    </section>
+        <div class="step-body" role="tabpanel" id="stepbody-3" aria-labelledby="step-3" hidden>
+          <div class="card-head">
+            <h3>Style the popup</h3>
+            <p class="card-sub">Set the theme, size, and whether romanization shows — with a live preview.</p>
+          </div>
+          <ol class="steps">
+            <li>Choose a light, dark, or automatic theme, and small / medium / large text.</li>
+            <li>Toggle romanization and on-page highlighting to taste.</li>
+            <li>The preview updates instantly, and every change saves on its own.</li>
+          </ol>
+          <p><button type="button" class="link-btn" data-goto="settings">Open Settings →</button></p>
+        </div>
 
-    <section class="ref">
-      <h2>About &amp; attribution</h2>
-      <p>KhmerLens works fully offline and collects no data. Dictionary compiled from:</p>
-      <ul class="sources">
-        <li><a href="https://kaikki.org/dictionary/Khmer/" target="_blank" rel="noopener">Wiktionary, via kaikki.org</a> — CC BY-SA 4.0. The bundled dictionary is likewise available under CC BY-SA 4.0.</li>
-        <li><a href="https://github.com/silnrsi/khmerlbdict" target="_blank" rel="noopener">SIL khmerlbdict</a> frequency wordlist — MIT License, © 2015 SIL NRSI.</li>
-        <li>Pronunciation recordings from <a href="https://commons.wikimedia.org/wiki/Category:Khmer_pronunciation" target="_blank" rel="noopener">Wikimedia Commons</a> and <a href="https://lingualibre.org/" target="_blank" rel="noopener">Lingua Libre</a> contributors — CC BY-SA 4.0 (per-file credits in ATTRIBUTION.md).</li>
-      </ul>
-      <p class="colophon">Inspired by the <a href="https://github.com/cschiller/zhongwen" target="_blank" rel="noopener">Zhongwen</a> popup dictionary for Chinese.</p>
-    </section>
+        <div class="step-body" role="tabpanel" id="stepbody-4" aria-labelledby="step-4" hidden>
+          <div class="card-head">
+            <h3>Optional extras</h3>
+            <p class="card-sub">Turn these on only if you want them — all off by default.</p>
+          </div>
+          <ul class="sources">
+            <li><strong>Anki flashcards</strong> — connect the Anki desktop app and press <kbd>A</kbd> to save words as notes.</li>
+            <li><strong>Pronunciation</strong> — press <kbd>S</kbd> to hear a word (bundled recording, or your system's Khmer voice).</li>
+            <li><strong>Online lookup</strong> — enable kheng.info to fetch definitions for words not in the offline dictionary (press <kbd>K</kbd>).</li>
+          </ul>
+          <p>
+            <button type="button" class="link-btn" data-goto="settings">Open Settings →</button>
+            <button type="button" class="link-btn" data-goto="help">Read the FAQ →</button>
+          </p>
+        </div>
+
+        <div class="wizard-nav">
+          <button type="button" class="wiz-btn" id="wiz-prev">← Back</button>
+          <button type="button" class="wiz-btn wiz-btn-primary" id="wiz-next">Next →</button>
+        </div>
+      </section>
+    </div>
   </main>
   <script src="../lib/anki.js"></script>
   <script src="options.js"></script>
