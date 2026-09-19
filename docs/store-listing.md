@@ -13,10 +13,10 @@ This document contains the text and metadata for the KhmerLens Chrome Web Store 
 **Short Description (Max 132 characters):**
 
 ```
-Instant Khmer-to-English dictionary popup. Hover over any Khmer text on any webpage for instant definitions.
+Hover any Khmer word for an instant English definition, audio, and Anki cards. Works offline. No tracking.
 ```
 
-Character count: 110/132 ✓
+Character count: 106/132 ✓
 
 ---
 
@@ -36,18 +36,26 @@ Hover over any Khmer word on any webpage, and a popup appears instantly with:
 **Key Features:**
 
 - **Instant lookups** - No clicking, no submitting. Just hover over Khmer text.
-- **Complete offline** - All 21,514 words are built in. No internet required, no data sent anywhere.
-- **Zero tracking** - We collect zero data. No analytics, no network requests, no tracking.
+- **Complete offline** - All 21,514 words are built in. No internet required by default, and nothing is sent anywhere.
+- **Zero tracking** - We collect zero data. No analytics, no tracking.
 - **Smart segmentation** - Khmer has no spaces. KhmerLens uses dictionary-aware segmentation to find words accurately, even in long strings.
-- **Customizable** - Choose light/dark theme, adjust font size, toggle romanization, and toggle on-page highlighting.
-- **Keyboard shortcuts** - Shift to cycle matches, c to copy, n to jump to next word, b to jump back, Esc to hide.
+- **Pronunciation** - Press S or click the speaker button to hear a word: bundled native-speaker recordings (offline), or your system's Khmer voice if you have one.
+- **Anki flashcards (optional)** - Press A or click the Anki button to save a word straight into your Anki deck via the AnkiConnect add-on. Choose the deck, note type, field mapping and tags. Duplicates are skipped, and everything stays on your computer.
+- **Look up missing words on kheng.info (optional, off by default)** - For words with no bundled definition, fetch one on demand with a single click (or press K) and see it right in the popup.
+- **Paste panel** - Can't hover text in Google Docs, PDFs or canvas editors? Turn on the paste panel, paste the Khmer text into it, and hover as usual.
+- **Freeze and navigate** - Press F to freeze the popup while you read, N to jump to the next Khmer word, B to go back to the previous one.
+- **Clickable actions** - Copy, next, alternate matches, pronunciation and Anki are all buttons in the popup, not just shortcuts.
+- **Responsive popup** - The popup stays out of the way of the word you are reading and stays put while you move your cursor onto it.
+- **Customizable** - Choose light/dark/auto theme, adjust font size, toggle romanization, and toggle on-page highlighting from a tabbed options page with a Quick Start guide.
+- **Keyboard shortcuts** - Alt+K to toggle on the current tab, Shift to cycle matches, C to copy, N next word, B previous word, S speak, A add to Anki, K kheng.info lookup, F freeze, Esc to hide.
 
 **Getting Started**
 
 1. Click the toolbar icon to open the popup, then flip the switch ON (or press Alt+K, which toggles the tab directly) - badge shows "ON" when active
 2. Hover over any Khmer text
 3. Read the definition in the popup
-4. Use keyboard shortcuts (Shift, c, n, b, Esc) for faster interaction
+4. Use keyboard shortcuts (Shift, C, N, B, S, A, K, F, Esc) or the popup buttons for faster interaction
+5. Open Options (right-click the icon) to set up Anki, pronunciation and appearance
 
 **Dictionary Stats**
 
@@ -59,12 +67,13 @@ Hover over any Khmer word on any webpage, and a popup appears instantly with:
 **Permissions**
 
 - **storage** - Stores your settings (theme, font size, etc.) locally
-- **clipboardWrite** - Allows you to copy word + definition with the 'c' shortcut
+- **clipboardWrite** - Allows you to copy word + definition with the C shortcut or button
+- **Optional permissions (asked only if you enable them)** - access to `127.0.0.1` for the Anki integration, and to `kheng.info` for live lookups
 - **activeTab + scripting** - Detects Khmer text and hovering for popups, but only on tabs you explicitly activate (toolbar click or Alt+K); no broad "read and change all your data on all websites" access
 
 **Privacy**
 
-- We collect **zero data** - no analytics, no tracking, no network requests
+- We collect **zero data** - no analytics, no tracking, and no network requests unless you turn on an optional feature
 - Settings are stored locally on your device
 - External links (kheng.info) open only when you click them
 - All dictionary lookups happen offline, locally
