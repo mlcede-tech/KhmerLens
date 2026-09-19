@@ -1,7 +1,7 @@
 /**
  * KhmerLens content script: hover detection, popup UI, highlight, shortcuts.
  * Depends on lib/khmer.js (KhmerLensCore), lib/dictionary.js (KhmerLensDict),
- * lib/popup.js (KhmerLensPopup) — loaded before this file via the manifest.
+ * lib/popup.js (KhmerLensPopup) - loaded before this file via the manifest.
  */
 (function () {
   'use strict';
@@ -125,7 +125,7 @@
     var bundled = dict ? dict.senses(m.word) : null;
     var entry;
     // Prefer a live kheng.info definition when the bundled dictionary has no
-    // glosses for this word — kheng.js senses share the [pos, roman, gloss]
+    // glosses for this word - kheng.js senses share the [pos, roman, gloss]
     // shape lib/anki.js expects, so no field mapping is needed here.
     if (m.khengSenses && !(bundled && bundled.length)) {
       entry = { word: m.khengLemma || m.word, senses: m.khengSenses };
@@ -298,7 +298,7 @@
 
   /**
    * Render the popup for the match at current.index.
-   * All page-derived strings go through textContent — never innerHTML.
+   * All page-derived strings go through textContent - never innerHTML.
    */
   function renderPopup() {
     applyTheme(); // re-check auto theme (system scheme may have changed)
@@ -487,7 +487,7 @@
   }
 
   // Bounding box enclosing both the hovered word and the open popup, plus a
-  // small margin. While the cursor is inside it we leave the popup alone —
+  // small margin. While the cursor is inside it we leave the popup alone -
   // otherwise every mousemove on the way from the word to e.g. the kheng.info
   // link re-runs the lookup, and since the popup is re-positioned relative to
   // wherever the cursor now is, it keeps hopping just out of reach.
@@ -502,8 +502,8 @@
   }
 
   // Called from lookupAt when nothing translatable is under the cursor. If the
-  // cursor is resting in the safe zone — the word→popup gap, e.g. on the way to
-  // the kheng.info link or an action button — keep the popup so it doesn't
+  // cursor is resting in the safe zone - the word→popup gap, e.g. on the way to
+  // the kheng.info link or an action button - keep the popup so it doesn't
   // vanish mid-reach. Anywhere else, hide it as usual.
   function hideUnlessSafe(x, y) {
     if (visible && inSafeZone(x, y)) return;
@@ -636,7 +636,7 @@
     // ignore moves over our own popup (e.g. reaching for the kheng.info
     // link) so the popup doesn't hide or re-render underneath the cursor
     if (host && (ev.target === host || host.contains(ev.target))) return;
-    // Note: a word covered by (or beside) the popup is still looked up — the
+    // Note: a word covered by (or beside) the popup is still looked up - the
     // safe zone no longer suppresses lookups here; it only keeps the popup from
     // vanishing over an *empty* gap, handled in lookupAt via hideUnlessSafe.
     lastMouse.x = ev.clientX;
@@ -820,7 +820,7 @@
         var matches = core.findMatches(text, i, dict.has.bind(dict), dict.maxWordLen);
         if (matches.length) {
           // findMatches ranks matches starting at i first, but we want the
-          // word ending closest to (and not past) the current word's start —
+          // word ending closest to (and not past) the current word's start -
           // i.e. the one immediately before it, not whatever starts at i.
           // On a tie, prefer the longer match, same as a fresh hover would.
           var best = null;

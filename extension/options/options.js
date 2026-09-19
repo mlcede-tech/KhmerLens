@@ -223,7 +223,7 @@ function loadModelFields() {
 function ankiConnect() {
   ankiStatus('Connecting…');
   ankiCall('version').then(function (version) {
-    ankiStatus('Connected — AnkiConnect v' + version, 'ok');
+    ankiStatus('Connected - AnkiConnect v' + version, 'ok');
     return Promise.all([ankiCall('deckNames'), ankiCall('modelNames')]);
   }).then(function (res) {
     var decks = res[0], models = res[1];

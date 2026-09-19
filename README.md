@@ -42,12 +42,12 @@ Follow the "Quick Load" steps above, using the cloned `extension/` folder.
 
 ### Basic Usage
 
-1. Click the toolbar icon to open the popup, then flip the switch ON (or press Alt+K, which toggles the tab directly) to activate KhmerLens on the current tab — the badge shows "ON"
+1. Click the toolbar icon to open the popup, then flip the switch ON (or press Alt+K, which toggles the tab directly) to activate KhmerLens on the current tab - the badge shows "ON"
 2. Hover over any Khmer text on the page
 3. A popup appears with the word, definitions, and metadata
 4. Move the cursor away or press Esc to dismiss
 
-KhmerLens uses Chrome's `activeTab` model: it requests no host permissions and only reads a page after you activate it there. Because that access ends when you navigate, KhmerLens turns off on the new page — open the popup and flip the switch (or press Alt+K) again to re-activate.
+KhmerLens uses Chrome's `activeTab` model: it requests no host permissions and only reads a page after you activate it there. Because that access ends when you navigate, KhmerLens turns off on the new page - open the popup and flip the switch (or press Alt+K) again to re-activate.
 
 ### Paste Panel
 
@@ -55,10 +55,10 @@ For text that KhmerLens can't read in place (such as Google Docs, PDFs, or canva
 
 1. Click the toolbar icon → a popup appears with a labeled **ON/OFF toggle** and a separate **Paste panel** toggle
 2. Click the toggle to turn KhmerLens **ON**
-3. Click the **Paste panel** toggle to open a small paste panel in the top-right corner of the page (it stays off until you turn it on — it does not open automatically)
+3. Click the **Paste panel** toggle to open a small paste panel in the top-right corner of the page (it stays off until you turn it on - it does not open automatically)
 4. Paste Khmer text into the panel (Ctrl+V / Cmd+V)
 5. Hover over any word in the panel to see its definition
-6. Click the toggle to turn KhmerLens **OFF** — this disables the lens and closes the panel
+6. Click the toggle to turn KhmerLens **OFF** - this disables the lens and closes the panel
 
 The panel automatically converts pasted content to plain text, so formatting from sources like Google Docs won't interfere with word matching.
 
@@ -86,18 +86,18 @@ Access settings by right-clicking the extension icon → **Options**:
 - **Romanization:** Show/hide romanization (Wiktionary phonetic scheme)
 - **On-page Highlight:** Highlight Khmer text when hovering
 - **Anki integration:** Enable/disable, AnkiConnect address, target deck, note type, per-field mapping (word / romanization / definition / part of speech), and tags
-- **Look up missing definitions on kheng.info:** Opt-in, off by default. When enabled (which requests an optional host permission for `https://kheng.info/*`), words with no bundled definition show a **Look up on kheng.info** button — click it, or press **K**, to fetch that one word's definition on demand and show it inline (it can also fill an Anki card). Results are cached briefly on-device; nothing is bundled or redistributed.
+- **Look up missing definitions on kheng.info:** Opt-in, off by default. When enabled (which requests an optional host permission for `https://kheng.info/*`), words with no bundled definition show a **Look up on kheng.info** button - click it, or press **K**, to fetch that one word's definition on demand and show it inline (it can also fill an Anki card). Results are cached briefly on-device; nothing is bundled or redistributed.
 
 ### Audio pronunciation
 
 The popup shows a 🔊 button when audio is available for the hovered word:
 
-- **Bundled recordings** — freely licensed (CC BY-SA 4.0) native-speaker recordings from Wikimedia Commons and Lingua Libre, shipped inside the extension (works offline). Coverage is currently small (17 words) because few free Khmer recordings exist; rerun `data-pipeline/fetch_audio.py` to pick up new ones.
-- **System Khmer voice** — if your OS provides a Khmer text-to-speech voice, every word becomes speakable via the same button.
+- **Bundled recordings** - freely licensed (CC BY-SA 4.0) native-speaker recordings from Wikimedia Commons and Lingua Libre, shipped inside the extension (works offline). Coverage is currently small (17 words) because few free Khmer recordings exist; rerun `data-pipeline/fetch_audio.py` to pick up new ones.
+- **System Khmer voice** - if your OS provides a Khmer text-to-speech voice, every word becomes speakable via the same button.
 
 ### Anki integration
 
-Adds the hovered word to an existing deck in the Anki desktop app, using the [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on's local API (`http://127.0.0.1:8765` — nothing leaves your machine):
+Adds the hovered word to an existing deck in the Anki desktop app, using the [AnkiConnect](https://ankiweb.net/shared/info/2055492159) add-on's local API (`http://127.0.0.1:8765` - nothing leaves your machine):
 
 1. In Anki: Tools → Add-ons → Get Add-ons → code `2055492159`, restart Anki.
 2. In KhmerLens options: enable **Add words to Anki** (Chrome asks once for permission to reach `127.0.0.1`), click **Connect**, then pick your deck, note type, and how fields are filled.
@@ -185,7 +185,7 @@ KhmerLens collects **no data whatsoever**:
 - Settings stored locally (or synced via Chrome sync if enabled)
 - External links (kheng.info) only opened on explicit user click
 
-The optional **kheng.info lookup** feature (see Options) is the only exception, and it is **off by default**. When you enable it, Chrome requests an **optional host permission** for `https://kheng.info/*`, granted only at that point — so a default install still has **no host permissions**. When enabled, KhmerLens sends a single Khmer word to kheng.info only when you click the lookup button or press **K**, and caches the result locally; nothing else is transmitted.
+The optional **kheng.info lookup** feature (see Options) is the only exception, and it is **off by default**. When you enable it, Chrome requests an **optional host permission** for `https://kheng.info/*`, granted only at that point - so a default install still has **no host permissions**. When enabled, KhmerLens sends a single Khmer word to kheng.info only when you click the lookup button or press **K**, and caches the result locally; nothing else is transmitted.
 
 See [privacy-policy.md](docs/privacy-policy.md) for details.
 

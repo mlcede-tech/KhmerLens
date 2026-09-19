@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "KhmerLens — Khmer Popup Dictionary",
+  "name": "KhmerLens - Khmer Popup Dictionary",
   "version": "1.0.0",
   "description": "Hover over Khmer text to see instant English definitions, romanization, and word frequency. Works fully offline.",
   "minimum_chrome_version": "105",

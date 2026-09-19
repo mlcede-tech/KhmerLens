@@ -1,6 +1,6 @@
 /**
  * KhmerLens core segmentation + longest-match logic.
- * Pure functions, no DOM/chrome dependencies — shared by the content script
+ * Pure functions, no DOM/chrome dependencies - shared by the content script
  * (classic script, exposes globalThis.KhmerLens) and Node unit tests.
  */
 (function (root) {
@@ -180,7 +180,7 @@
     }
 
     // Order: matches starting at the hovered grapheme first (longest first),
-    // then earlier starts (longest first) — earlier ICU-aligned starts get
+    // then earlier starts (longest first) - earlier ICU-aligned starts get
     // priority over non-aligned ones at the same distance.
     matches.sort(function (a, b) {
       var aAtHover = a.cleanStart === gStart ? 0 : 1;

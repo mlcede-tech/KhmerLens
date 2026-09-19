@@ -1,4 +1,4 @@
-# KhmerLens — architecture notes and v2 extension points
+# KhmerLens - architecture notes and v2 extension points
 
 ## Architecture (v1)
 

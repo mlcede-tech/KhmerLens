@@ -5,7 +5,7 @@ is the source of truth; every other surface stays consistent with it.
 
 ## Color
 
-Strategy: **Restrained** — tinted neutrals + one committed accent (amber).
+Strategy: **Restrained** - tinted neutrals + one committed accent (amber).
 The accent is the brand; it carries the letter mark, focus rings, selected
 states, and links. Nothing decorative is colored.
 
@@ -39,7 +39,7 @@ large/bold or non-text signal, not small body copy on tinted grounds.
   One family, weights 400/500/600. Fixed rem scale (product register),
   ratio ~1.2. No display face in labels or controls.
 - **Khmer**: `"Khmer OS", "Noto Sans Khmer", "Khmer Sangam MN", "Khmer UI",
-  "Leelawadee UI", sans-serif` — the popup's word stack, reused wherever
+  "Leelawadee UI", sans-serif` - the popup's word stack, reused wherever
   Khmer script appears so the sample renders exactly as the real popup.
 - **Mono**: `ui-monospace, monospace` for `<kbd>` shortcut keys only.
 
@@ -65,4 +65,4 @@ choreography. Full `prefers-reduced-motion: reduce` fallback (instant).
 
 Single centered column, max ~600px. Controls grouped in one panel above
 the fold; the live preview sits alongside/above them; reference material
-(how-to, shortcuts, attribution) below. No sidebar — the surface is small.
+(how-to, shortcuts, attribution) below. No sidebar - the surface is small.

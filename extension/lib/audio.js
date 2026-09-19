@@ -19,7 +19,7 @@
 
   /**
    * Pick a Khmer voice from speechSynthesis.getVoices().
-   * Matches 'km', 'km-KH', 'km_KH' — but not e.g. 'kmr' (Kurmanji).
+   * Matches 'km', 'km-KH', 'km_KH' - but not e.g. 'kmr' (Kurmanji).
    */
   function pickKhmerVoice(voices) {
     for (var i = 0; i < (voices || []).length; i++) {

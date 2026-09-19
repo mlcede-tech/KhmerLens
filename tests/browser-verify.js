@@ -1,12 +1,12 @@
 /**
  * KhmerLens live browser verification.
  *
- * Part A — content-script integration: serves the project over HTTP, runs the
+ * Part A - content-script integration: serves the project over HTTP, runs the
  * real lib + content scripts on the saved Khmer pages (via testkit's chrome
  * shim), simulates hover, and checks the popup, highlight, shortcuts, ZWSP,
  * links, scroll containers, and dark mode.
  *
- * Part B — extension smoke: loads the actual unpacked extension and confirms
+ * Part B - extension smoke: loads the actual unpacked extension and confirms
  * the MV3 service worker boots with the activeTab + scripting permission model.
  *
  * Run: node browser-verify.js
@@ -25,7 +25,7 @@ fs.mkdirSync(SHOTS, { recursive: true });
 let failures = 0;
 function check(name, cond, extra) {
   if (!cond) failures++;
-  console.log(`[${cond ? 'PASS' : 'FAIL'}] ${name}${extra ? ' — ' + extra : ''}`);
+  console.log(`[${cond ? 'PASS' : 'FAIL'}] ${name}${extra ? ' - ' + extra : ''}`);
 }
 
 async function hoverKhmer(page, selector, charIndex = 2) {
@@ -315,7 +315,7 @@ async function partB() {
 }
 
 async function partC() {
-  console.log('\n— Part C: paste panel —');
+  console.log('\n- Part C: paste panel -');
   const server = await kit.startServer();
   const browser = await chromium.launch();
   const page = await browser.newPage();
@@ -360,7 +360,7 @@ async function partC() {
 }
 
 async function partD() {
-  console.log('\n— Part D: independent paste-panel toggle —');
+  console.log('\n- Part D: independent paste-panel toggle -');
   const server = await kit.startServer();
   const browser = await chromium.launch();
 
@@ -400,7 +400,7 @@ async function partD() {
   check('togglePanel again closes it', resp && resp.open === false, JSON.stringify(resp));
   await page.close();
 
-  // D2: action.html/action.js — the popup's own "Paste panel" switch, driven
+  // D2: action.html/action.js - the popup's own "Paste panel" switch, driven
   // against a mocked background so it can be tested without an activeTab
   // gesture (Playwright can't simulate a real toolbar click; see partB).
   const page2 = await browser.newPage();
@@ -452,7 +452,7 @@ async function partD() {
 }
 
 async function partE() {
-  console.log('\n— Part E: kheng.info live lookup —');
+  console.log('\n- Part E: kheng.info live lookup -');
   const server = await kit.startServer();
   const browser = await chromium.launch();
   const page = await browser.newPage();
@@ -521,7 +521,7 @@ async function partE() {
   check('lookup button is the topmost element at its center (pointer-events)', clickable);
 
   // Feed the service-worker stub the saved hit fixture, then click the button
-  // (exercises the real click path — regressed once when the pill inherited the
+  // (exercises the real click path - regressed once when the pill inherited the
   // card's pointer-events:none).
   const hitHtml = fs.readFileSync(
     path.join(__dirname, 'fixtures', 'pages', 'kheng-hit.html'), 'utf8');
@@ -580,9 +580,9 @@ async function partE() {
 }
 
 (async () => {
-  console.log('— Part A: content-script integration —');
+  console.log('- Part A: content-script integration -');
   await partA();
-  console.log('\n— Part B: extension smoke (permission model) —');
+  console.log('\n- Part B: extension smoke (permission model) -');
   await partB();
   await partC();
   await partD();
