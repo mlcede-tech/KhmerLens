@@ -9,7 +9,7 @@ product
 Intermediate Khmer learners reading real Khmer websites (news, Wikipedia,
 Facebook). They reach the options page occasionally, to set the popup to
 their taste (theme, size, whether to show romanization). Their real work
-happens on the web page, not here — this surface should be quick to
+happens on the web page, not here - this surface should be quick to
 understand and quick to leave.
 
 ## Product Purpose
@@ -17,7 +17,7 @@ understand and quick to leave.
 KhmerLens is a hover dictionary. The options page configures how the
 lookup popup looks and behaves. Success is a settings screen a learner
 can scan in seconds, change one thing with confidence, and see the effect
-without guessing — the popup they're tuning is the thing they should see.
+without guessing - the popup they're tuning is the thing they should see.
 
 ## Brand Personality
 

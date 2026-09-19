@@ -1,4 +1,4 @@
-/* KhmerLens popup card — lives inside a closed shadow root. */
+/* KhmerLens popup card - lives inside a closed shadow root. */
 :host {
   all: initial;
 }

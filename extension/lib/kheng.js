@@ -6,7 +6,7 @@
  * Pure and DOM-based. `parseKhengDefinition` accepts either an HTML string
  * (parsed with DOMParser when available) or an already-parsed Document/Element,
  * so it runs in the content script (native DOMParser) and under Node tests
- * (a jsdom document passed in). No network here — the service worker fetches.
+ * (a jsdom document passed in). No network here - the service worker fetches.
  */
 (function (root) {
   'use strict';
@@ -71,10 +71,10 @@
    * @param {string|Document|Element} doc  HTML string or parsed DOM.
    * @param {string} [word]  the queried headword, for the exact-match flag.
    * @returns {{found:boolean, exact:boolean, lemma:string, senses:Array}}
-   *   found  — a headword entry with at least one gloss was present
-   *   exact  — the entry's lemma equals the queried word (normalized)
-   *   lemma  — kheng.info's headword text (use this for the no-match fallback)
-   *   senses — [[pos, '', gloss], …], same shape as dictionary.js senses
+   *   found  - a headword entry with at least one gloss was present
+   *   exact  - the entry's lemma equals the queried word (normalized)
+   *   lemma  - kheng.info's headword text (use this for the no-match fallback)
+   *   senses - [[pos, '', gloss], …], same shape as dictionary.js senses
    */
   function parseKhengDefinition(doc, word) {
     var empty = { found: false, exact: false, lemma: '', senses: [] };

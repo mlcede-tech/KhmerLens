@@ -4,7 +4,7 @@
 
 **Goal:** Add an in-page side panel where the user pastes Khmer text, so KhmerLens hover-translation works on sources it can't read directly (Google Docs, canvas-rendered editors, PDFs).
 
-**Architecture:** The panel is a light-DOM container injected into the current page by the existing content script when the lens is enabled. Because the hover engine reads words with `document.caretPositionFromPoint` (which does **not** descend into shadow roots), the panel's editable text area must live in the light DOM — then the existing detection engine reads it with no changes. A new browser-action popup gives the user an on/off toggle switch; turning it on enables the lens on the tab and opens the panel.
+**Architecture:** The panel is a light-DOM container injected into the current page by the existing content script when the lens is enabled. Because the hover engine reads words with `document.caretPositionFromPoint` (which does **not** descend into shadow roots), the panel's editable text area must live in the light DOM - then the existing detection engine reads it with no changes. A new browser-action popup gives the user an on/off toggle switch; turning it on enables the lens on the tab and opens the panel.
 
 **Tech Stack:** Chrome MV3, vanilla ES5-style JS (matching existing `var`/IIFE code), no build step. Tests: `node --test` (unit) and Playwright via `node browser-verify.js` (live browser).
 
@@ -15,7 +15,7 @@
 Every task's requirements implicitly include these. Values are copied from the existing codebase and must not be violated.
 
 - **Manifest V3**, `minimum_chrome_version` stays `"105"`.
-- **No new permissions.** Keep `["activeTab", "scripting", "storage", "clipboardWrite"]` exactly. Do **not** add `clipboardRead`, `host_permissions`, or `<all_urls>` content scripts. `browser-verify.js` Part B asserts there are NO broad host permissions — that assertion must keep passing.
+- **No new permissions.** Keep `["activeTab", "scripting", "storage", "clipboardWrite"]` exactly. Do **not** add `clipboardRead`, `host_permissions`, or `<all_urls>` content scripts. `browser-verify.js` Part B asserts there are NO broad host permissions - that assertion must keep passing.
 - **The panel's editable area is light DOM, never a shadow root.** The definition popup stays in its shadow root (it is output, not hovered); the paste area is input the user hovers, so the caret APIs must reach it.
 - **No `innerHTML` for any page-derived or user-pasted string.** Use `textContent` / DOM node creation, matching `content.js` (`el()` helper). Pasted text is inserted as a plain text node only.
 - **Code style:** vanilla JS, `'use strict'`, `var`, IIFE module exposing one global (e.g. `globalThis.KhmerLensPanel`), matching `content/content.js` and `lib/*.js`. No frameworks, no bundler.
@@ -27,18 +27,18 @@ Every task's requirements implicitly include these. Values are copied from the e
 ## File Structure
 
 **New files:**
-- `extension/content/panel.js` — builds/opens/closes the side panel, sanitizes paste to plain text. Exposes `globalThis.KhmerLensPanel = { open, close, toggle, isOpen }`. Injected before `content.js`.
-- `extension/action/action.html` — browser-action popup markup (toggle switch + hint text).
-- `extension/action/action.css` — popup styles.
-- `extension/action/action.js` — reads current tab's enabled state, drives the toggle by messaging the background worker.
-- `tests/panel.test.js` — unit tests for the pure paste-normalization helper.
+- `extension/content/panel.js` - builds/opens/closes the side panel, sanitizes paste to plain text. Exposes `globalThis.KhmerLensPanel = { open, close, toggle, isOpen }`. Injected before `content.js`.
+- `extension/action/action.html` - browser-action popup markup (toggle switch + hint text).
+- `extension/action/action.css` - popup styles.
+- `extension/action/action.js` - reads current tab's enabled state, drives the toggle by messaging the background worker.
+- `tests/panel.test.js` - unit tests for the pure paste-normalization helper.
 
 **Modified files:**
-- `extension/manifest.json` — add `"default_popup": "action/action.html"` to the `action` block.
-- `extension/background.js` — add `content/panel.js` to `CONTENT_FILES`; add a `khmerlens:toggle` message handler that toggles the active tab; remove the now-superseded `chrome.action.onClicked` listener (setting `default_popup` stops it firing). Keep the `Alt+K` command working.
-- `extension/content/content.js` — in `setEnabled(on)`, open the panel when enabling and close it when disabling (top frame only).
-- `tests/testkit.js:73` — add `'content/panel.js'` to the `files` array so the live-browser harness loads it.
-- `tests/browser-verify.js` — add a Part C that opens the panel, pastes Khmer text, hovers it, and asserts the popup appears.
+- `extension/manifest.json` - add `"default_popup": "action/action.html"` to the `action` block.
+- `extension/background.js` - add `content/panel.js` to `CONTENT_FILES`; add a `khmerlens:toggle` message handler that toggles the active tab; remove the now-superseded `chrome.action.onClicked` listener (setting `default_popup` stops it firing). Keep the `Alt+K` command working.
+- `extension/content/content.js` - in `setEnabled(on)`, open the panel when enabling and close it when disabling (top frame only).
+- `tests/testkit.js:73` - add `'content/panel.js'` to the `files` array so the live-browser harness loads it.
+- `tests/browser-verify.js` - add a Part C that opens the panel, pastes Khmer text, hovers it, and asserts the popup appears.
 
 ---
 
@@ -48,7 +48,7 @@ These are settled. Do not re-litigate them mid-build; if reality contradicts one
 
 1. **Entry point:** Clicking the toolbar icon opens a small popup containing one labeled toggle switch: "KhmerLens on this tab". Turning it **on** enables the lens on the tab (existing inject/enable flow) and opens the paste panel. Turning it **off** disables the lens and closes the panel. `Alt+K` remains a second way to toggle.
 2. **Why a popup instead of the current one-click toggle:** the user asked for a visible switch. Setting `default_popup` automatically disables `chrome.action.onClicked`, so that listener is removed and the popup drives toggling via a `khmerlens:toggle` message to the background worker (which calls the existing `toggleTab`).
-3. **Panel = light DOM.** Confirmed load-bearing: `caretAt()` in `content/content.js:232` uses `document.caretPositionFromPoint`/`caretRangeFromPoint`, which return the shadow *host* — not inner text — for content inside a shadow root. So the editable area is a plain `contenteditable` div in the light DOM, wrapped in an `all: initial` container for isolation.
+3. **Panel = light DOM.** Confirmed load-bearing: `caretAt()` in `content/content.js:232` uses `document.caretPositionFromPoint`/`caretRangeFromPoint`, which return the shadow *host* - not inner text - for content inside a shadow root. So the editable area is a plain `contenteditable` div in the light DOM, wrapped in an `all: initial` container for isolation.
 4. **Paste is forced to plain text.** On the editable's `paste` event: `preventDefault`, read `clipboardData.getData('text/plain')`, normalize it, and insert it as a single text node. This prevents Google Docs' HTML from fragmenting words across nested spans, which would break word matching.
 5. **Known v1 limitations (acceptable, document them):** scrolling inside the panel hides the definition popup until the next hover (the lens's `onScrollOrResize` hides on any scroll); the panel is fixed to the right edge and not draggable/resizable. Both are fine for v1.
 
@@ -63,7 +63,7 @@ var c = document.caretPositionFromPoint(r.left + 5, r.top + 5);
 console.log(c && c.offsetNode); // EXPECT: the shadow host <div>, NOT a text node
 ```
 
-Expected: logs the host element (proving shadow DOM hides text from the caret API). If it instead logs a text node inside the shadow root on the target Chrome version, the light-DOM constraint can be relaxed — note it and continue; the light-DOM approach still works either way.
+Expected: logs the host element (proving shadow DOM hides text from the caret API). If it instead logs a text node inside the shadow root on the target Chrome version, the light-DOM constraint can be relaxed - note it and continue; the light-DOM approach still works either way.
 
 ---
 
@@ -111,7 +111,7 @@ test('returns empty string for non-string input', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `cd tests && node --test panel.test.js`
-Expected: FAIL — `panel.js` does not exist yet / `normalizePastedText` undefined.
+Expected: FAIL - `panel.js` does not exist yet / `normalizePastedText` undefined.
 
 - [ ] **Step 3: Write minimal implementation**
 
@@ -162,11 +162,11 @@ git commit -m "feat(panel): add paste-text normalizer with unit tests"
 **Interfaces:**
 - Consumes: `normalizePastedText` from Task 1.
 - Produces on `globalThis.KhmerLensPanel`:
-  - `open() -> void` — creates (once) and shows the panel in the top frame; no-op in subframes.
-  - `close() -> void` — hides the panel (keeps the DOM for reuse).
+  - `open() -> void` - creates (once) and shows the panel in the top frame; no-op in subframes.
+  - `close() -> void` - hides the panel (keeps the DOM for reuse).
   - `toggle() -> void`
   - `isOpen() -> boolean`
-  - `getEditableEl() -> HTMLElement | null` — the `contenteditable` div (used by the browser test to locate pasted text).
+  - `getEditableEl() -> HTMLElement | null` - the `contenteditable` div (used by the browser test to locate pasted text).
 
 - [ ] **Step 1: Add the DOM builder, CSS string, and paste handler**
 
@@ -175,7 +175,7 @@ Append inside the IIFE, before `globalThis.KhmerLensPanel = api;`. Requirements:
 - `PANEL_CSS`: an inline string. Root selector `#khmerlens-panel` gets `all: initial` reset plus: `position: fixed; top: 12px; right: 12px; width: 340px; max-height: 80vh; z-index: 2147483646;` (one below the popup card's `2147483647` at `content/content.js:79`, so definitions render above the panel). Style the header, buttons, and a `.klp-body` editable area (`overflow: auto; min-height: 160px;`, comfortable Khmer line-height ~2.0, ~18px font). Scope every rule under `#khmerlens-panel`. Inject it via a `<style id="khmerlens-panel-style">` appended to `document.head` once.
 - `build()`:
   - Create `var root = document.createElement('div'); root.id = 'khmerlens-panel';`.
-  - Header row: a title span `"KhmerLens — paste Khmer here"`, a `Clear` button, and a `×` close button. Use `textContent` only. Close button calls `close()`; Clear button empties the editable via `editable.textContent = ''`.
+  - Header row: a title span `"KhmerLens - paste Khmer here"`, a `Clear` button, and a `×` close button. Use `textContent` only. Close button calls `close()`; Clear button empties the editable via `editable.textContent = ''`.
   - Body: `var editable = document.createElement('div'); editable.className = 'klp-body'; editable.setAttribute('contenteditable', 'plaintext-only'); editable.setAttribute('spellcheck', 'false'); editable.setAttribute('dir', 'auto');` (fall back handled by the paste listener if `plaintext-only` is unsupported).
   - Paste listener on `editable`:
 
@@ -204,7 +204,7 @@ editable.addEventListener('paste', function (e) {
 - [ ] **Step 2: Confirm the unit test still passes (helper untouched under Node)**
 
 Run: `cd tests && node --test panel.test.js`
-Expected: PASS (4/4). The DOM code must not execute at load under Node — it only runs when `open()` is called in a browser.
+Expected: PASS (4/4). The DOM code must not execute at load under Node - it only runs when `open()` is called in a browser.
 
 - [ ] **Step 3: Commit**
 
@@ -241,7 +241,7 @@ var CONTENT_FILES = [
 
 - [ ] **Step 2: Open/close the panel from setEnabled**
 
-In `extension/content/content.js`, inside `setEnabled(on)` (starts at line 429), open the panel when enabling and close it when disabling — top frame only, guarded so a missing global never throws:
+In `extension/content/content.js`, inside `setEnabled(on)` (starts at line 429), open the panel when enabling and close it when disabling - top frame only, guarded so a missing global never throws:
 
 ```js
     if (enabled) {
@@ -282,7 +282,7 @@ git commit -m "feat(panel): open the paste panel when KhmerLens is enabled"
 
 ---
 
-## Task 4: Live-browser test — paste into the panel and hover it
+## Task 4: Live-browser test - paste into the panel and hover it
 
 **Files:**
 - Modify: `tests/browser-verify.js` (add `partC`, call it from the runner)
@@ -296,7 +296,7 @@ Add a `partC` function and invoke it from the main runner (near the `partA()`/`p
 
 ```js
 async function partC() {
-  console.log('\n— Part C: paste panel —');
+  console.log('\n- Part C: paste panel -');
   const server = await kit.startServer();
   const browser = await chromium.launch();
   const page = await browser.newPage();
@@ -340,7 +340,7 @@ Also add `await partC();` to the runner alongside the existing `await partA(); a
 - [ ] **Step 2: Run to verify it currently passes end-to-end**
 
 Run: `cd tests && node browser-verify.js`
-Expected: Part C prints `[PASS]` for all four checks. (If `basic.html` is not the fixture filename, list `tests/fixtures/pages/` and use an existing Khmer fixture page — any served HTML page works as the host.)
+Expected: Part C prints `[PASS]` for all four checks. (If `basic.html` is not the fixture filename, list `tests/fixtures/pages/` and use an existing Khmer fixture page - any served HTML page works as the host.)
 
 - [ ] **Step 3: Commit**
 
@@ -363,7 +363,7 @@ git commit -m "test(panel): verify hover translation works on pasted panel text"
 
 - [ ] **Step 1: Add the popup files**
 
-`extension/action/action.html` — minimal, no inline script (CSP), links `action.css` and `action.js`:
+`extension/action/action.html` - minimal, no inline script (CSP), links `action.css` and `action.js`:
 
 ```html
 <!doctype html>
@@ -384,7 +384,7 @@ git commit -m "test(panel): verify hover translation works on pasted panel text"
 </html>
 ```
 
-`extension/action/action.css` — style `.switch` as a toggle (reuse the amber `#b45309` accent from the badge in `background.js:31`). Keep it self-contained; ~240px wide.
+`extension/action/action.css` - style `.switch` as a toggle (reuse the amber `#b45309` accent from the badge in `background.js:31`). Keep it self-contained; ~240px wide.
 
 `extension/action/action.js`:
 
@@ -428,7 +428,7 @@ In `extension/manifest.json`, add `default_popup` to the existing `action` block
 - [ ] **Step 3: Update the background worker**
 
 In `extension/background.js`:
-- Remove `chrome.action.onClicked.addListener(toggleTab);` (line 92) — `default_popup` supersedes it.
+- Remove `chrome.action.onClicked.addListener(toggleTab);` (line 92) - `default_popup` supersedes it.
 - Extend `toggleTab` (or wrap it) so it can report the resulting state and whether the page was blocked. Simplest: have it return `{ enabled, blocked }`. The existing restricted-page `catch` (lines 60-70) should set a `blocked` result instead of only styling the badge.
 - Add to the existing `onMessage` listener (line 99):
 
@@ -452,7 +452,7 @@ Expected: Part B still `[PASS]`, including `manifest has NO broad host_permissio
 
 - [ ] **Step 5: Manual smoke (record result in the commit body)**
 
-Load unpacked at `chrome://extensions`, open a YouTube tab, click the icon, flip the switch on. Expected: badge shows `ON`, the paste panel appears top-right. Paste Khmer text (e.g. from a Google Doc) and hover — definitions pop up. Flip off: panel disappears, badge clears. Try the switch on a `chrome://` page: the "This page can’t run KhmerLens" hint shows and the switch snaps back off.
+Load unpacked at `chrome://extensions`, open a YouTube tab, click the icon, flip the switch on. Expected: badge shows `ON`, the paste panel appears top-right. Paste Khmer text (e.g. from a Google Doc) and hover - definitions pop up. Flip off: panel disappears, badge clears. Try the switch on a `chrome://` page: the "This page can’t run KhmerLens" hint shows and the switch snaps back off.
 
 - [ ] **Step 6: Commit**
 
@@ -471,7 +471,7 @@ git commit -m "feat(action): add toolbar toggle switch that drives the lens + pa
 
 - [ ] **Step 1: Update README**
 
-Add a short "Paste panel" section: what it's for (translating text KhmerLens can't read in place — Google Docs, PDFs, canvas editors), and how (icon → toggle on → paste → hover). Note no new permissions were added.
+Add a short "Paste panel" section: what it's for (translating text KhmerLens can't read in place - Google Docs, PDFs, canvas editors), and how (icon → toggle on → paste → hover). Note no new permissions were added.
 
 - [ ] **Step 2: Run the full suite**
 
@@ -489,7 +489,7 @@ git commit -m "docs: document the paste panel and toolbar toggle"
 
 ## Self-Review notes for the executor
 
-- **Injection order matters:** `panel.js` must be listed before `content.js` in both `background.js` `CONTENT_FILES` and `tests/testkit.js`, or `content.js`'s `KhmerLensPanel` reference is undefined at enable time. (It's guarded with `try/catch`, so a wrong order fails silently as "panel never opens" rather than a crash — check Part C if the panel doesn't appear.)
+- **Injection order matters:** `panel.js` must be listed before `content.js` in both `background.js` `CONTENT_FILES` and `tests/testkit.js`, or `content.js`'s `KhmerLensPanel` reference is undefined at enable time. (It's guarded with `try/catch`, so a wrong order fails silently as "panel never opens" rather than a crash - check Part C if the panel doesn't appear.)
 - **The one thing that can quietly fail:** if a future change moves the paste area into a shadow root for styling, hover will stop working inside it (Task 0, Step 1 proves why). Keep the editable in light DOM.
-- **Name check:** the folder is `action/` (browser-action popup) — distinct from the existing `lib/popup.js` (tooltip-position math) and `content/popup.css` (definition-card styles). Don't conflate them.
-- **No new permissions** — if any task tempts you to add `clipboardRead` for a "Paste" button, don't; manual `Ctrl+V` into the editable needs nothing. A paste button is a v2 idea, out of scope.
+- **Name check:** the folder is `action/` (browser-action popup) - distinct from the existing `lib/popup.js` (tooltip-position math) and `content/popup.css` (definition-card styles). Don't conflate them.
+- **No new permissions** - if any task tempts you to add `clipboardRead` for a "Paste" button, don't; manual `Ctrl+V` into the editable needs nothing. A paste button is a v2 idea, out of scope.

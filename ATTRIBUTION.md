@@ -21,7 +21,7 @@ KhmerLens uses data and libraries from multiple open-source projects. This docum
 
 ### Pronunciation Recordings (17 words)
 
-**Sources:** [Wikimedia Commons — Category:Khmer pronunciation](https://commons.wikimedia.org/wiki/Category:Khmer_pronunciation) and [Lingua Libre](https://lingualibre.org/) (recordings hosted on Wikimedia Commons)
+**Sources:** [Wikimedia Commons - Category:Khmer pronunciation](https://commons.wikimedia.org/wiki/Category:Khmer_pronunciation) and [Lingua Libre](https://lingualibre.org/) (recordings hosted on Wikimedia Commons)
 **License:** Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
 **What was used:** Native-speaker recordings of Khmer words, bundled in `extension/data/audio/` and indexed by `extension/data/audio-index.json` (rebuilt with `data-pipeline/fetch_audio.py`).
 
@@ -124,11 +124,11 @@ The KhmerLens extension uses the Chrome Web Store and Manifest V3 specifications
 
 If you use or distribute the KhmerLens dictionary or extension, include the following attribution:
 
-> **KhmerLens** — https://github.com/[username]/khmer-lens
+> **KhmerLens** - https://github.com/[username]/khmer-lens
 >
 > Includes data from:
-> - Wiktionary (https://www.wiktionary.org/) — CC BY-SA 4.0
-> - SIL khmerlbdict (https://github.com/silnrsi/khmerlbdict) — MIT License, © 2015 SIL International
+> - Wiktionary (https://www.wiktionary.org/) - CC BY-SA 4.0
+> - SIL khmerlbdict (https://github.com/silnrsi/khmerlbdict) - MIT License, © 2015 SIL International
 >
 > KhmerLens is inspired by Zhongwen (https://github.com/ccaohuu/Zhongwen).
 

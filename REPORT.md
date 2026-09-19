@@ -1,4 +1,4 @@
-# KhmerLens — final report
+# KhmerLens - final report
 
 ## What works
 
@@ -6,14 +6,14 @@
   Khmer type), Wiktionary romanization, part of speech, English glosses,
   and a frequency badge. Verified live in headless Chromium (Playwright,
   extension loaded unpacked) on a saved Khmer Wikipedia page and a
-  realistic Khmer news page — 21/21 browser checks pass, screenshots in
+  realistic Khmer news page - 21/21 browser checks pass, screenshots in
   `tests/screenshots/`.
 - **Dictionary**: 9,420 glossed Khmer words (Wiktionary via kaikki.org,
   CC BY-SA 4.0) + 12,094 gloss-less frequency-list words (SIL khmerlbdict,
   MIT) = 21,514 lookup words, 1.8 MB, fully offline, reproducible via
   `data-pipeline/download.sh && python3 build_dictionary.py`.
 - **Segmentation**: longest-match over the wordlist, snapped to grapheme
-  clusters (never splits coeng/vowel clusters — asserted in tests), with
+  clusters (never splits coeng/vowel clusters - asserted in tests), with
   ICU (`Intl.Segmenter`) word boundaries as hints and fallback; zero-width
   spaces treated as boundary hints and stripped for lookup. Mid-word hover
   backtracks up to 30 code units to find the covering word.
@@ -64,7 +64,7 @@ Two full build→test→browser→self-review cycles, as required:
    bundled (Headley/kheng.info data is not redistributable). An opt-in,
    off-by-default on-demand kheng.info lookup now fills gloss-less words
    one at a time on user click (see v2 candidates); nothing is bundled or
-   redistributed — the external link remains for everything else.
+   redistributed - the external link remains for everything else.
 3. **Romanization is inconsistent in style** across Wiktionary entries
    (about 16% of glossed entries have none at all).
 4. **Not reachable**: text in closed shadow roots, `<input>`/`<textarea>`
@@ -76,7 +76,7 @@ Two full build→test→browser→self-review cycles, as required:
 ## v2 candidates
 
 1. Saved-word list + Anki export (schema and disabled UI affordance
-   already in place — see `docs/DESIGN.md`).
+   already in place - see `docs/DESIGN.md`).
 2. Audio pronunciation via the `KhmerLensAudio` provider stub.
 3. Better segmentation: bigram frequencies for match ranking, or a
    proper Khmer word-break model (e.g. khmer-nltk ported to JS/WASM).
@@ -84,7 +84,7 @@ Two full build→test→browser→self-review cycles, as required:
    links) match across boundaries; `nextWord` across nodes.
 5. Khmer→Khmer definitions if a redistributable source appears; more
    glosses by merging other CC-licensed lexicons. **Implemented (opt-in):**
-   on-demand kheng.info lookup for gloss-less words — off by default,
+   on-demand kheng.info lookup for gloss-less words - off by default,
    permission-gated (`https://kheng.info/*`), one word per user click/**K**
    key, cached briefly on-device, nothing bundled or redistributed.
 6. Popup pinning (click to keep open) and in-popup sub-word lookups.

@@ -113,7 +113,7 @@
 
     var title = document.createElement('span');
     title.className = 'klp-title';
-    title.textContent = 'KhmerLens — paste Khmer here';
+    title.textContent = 'KhmerLens - paste Khmer here';
 
     var clearBtn = document.createElement('button');
     clearBtn.type = 'button';

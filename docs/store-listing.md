@@ -35,16 +35,16 @@ Hover over any Khmer word on any webpage, and a popup appears instantly with:
 
 **Key Features:**
 
-- **Instant lookups** — No clicking, no submitting. Just hover over Khmer text.
-- **Complete offline** — All 21,514 words are built in. No internet required, no data sent anywhere.
-- **Zero tracking** — We collect zero data. No analytics, no network requests, no tracking.
-- **Smart segmentation** — Khmer has no spaces. KhmerLens uses dictionary-aware segmentation to find words accurately, even in long strings.
-- **Customizable** — Choose light/dark theme, adjust font size, toggle romanization, and toggle on-page highlighting.
-- **Keyboard shortcuts** — Shift to cycle matches, c to copy, n to jump to next word, b to jump back, Esc to hide.
+- **Instant lookups** - No clicking, no submitting. Just hover over Khmer text.
+- **Complete offline** - All 21,514 words are built in. No internet required, no data sent anywhere.
+- **Zero tracking** - We collect zero data. No analytics, no network requests, no tracking.
+- **Smart segmentation** - Khmer has no spaces. KhmerLens uses dictionary-aware segmentation to find words accurately, even in long strings.
+- **Customizable** - Choose light/dark theme, adjust font size, toggle romanization, and toggle on-page highlighting.
+- **Keyboard shortcuts** - Shift to cycle matches, c to copy, n to jump to next word, b to jump back, Esc to hide.
 
 **Getting Started**
 
-1. Click the toolbar icon to open the popup, then flip the switch ON (or press Alt+K, which toggles the tab directly) — badge shows "ON" when active
+1. Click the toolbar icon to open the popup, then flip the switch ON (or press Alt+K, which toggles the tab directly) - badge shows "ON" when active
 2. Hover over any Khmer text
 3. Read the definition in the popup
 4. Use keyboard shortcuts (Shift, c, n, b, Esc) for faster interaction
@@ -58,13 +58,13 @@ Hover over any Khmer word on any webpage, and a popup appears instantly with:
 
 **Permissions**
 
-- **storage** — Stores your settings (theme, font size, etc.) locally
-- **clipboardWrite** — Allows you to copy word + definition with the 'c' shortcut
-- **activeTab + scripting** — Detects Khmer text and hovering for popups, but only on tabs you explicitly activate (toolbar click or Alt+K); no broad "read and change all your data on all websites" access
+- **storage** - Stores your settings (theme, font size, etc.) locally
+- **clipboardWrite** - Allows you to copy word + definition with the 'c' shortcut
+- **activeTab + scripting** - Detects Khmer text and hovering for popups, but only on tabs you explicitly activate (toolbar click or Alt+K); no broad "read and change all your data on all websites" access
 
 **Privacy**
 
-- We collect **zero data** — no analytics, no tracking, no network requests
+- We collect **zero data** - no analytics, no tracking, no network requests
 - Settings are stored locally on your device
 - External links (kheng.info) open only when you click them
 - All dictionary lookups happen offline, locally
@@ -109,7 +109,7 @@ See [Attribution](../ATTRIBUTION.md) for complete source information.
 
 **Purpose:** Read the text on the current page so KhmerLens can detect the Khmer word under the cursor and show its definition.
 
-**Why activeTab (and not broad host access):** KhmerLens requests **no host permissions** and does **not** run on any site automatically. It only gains access to a page when you explicitly activate it — by opening the popup and flipping the switch, or pressing Alt+K, on that tab. The access is temporary and is revoked when you navigate away.
+**Why activeTab (and not broad host access):** KhmerLens requests **no host permissions** and does **not** run on any site automatically. It only gains access to a page when you explicitly activate it - by opening the popup and flipping the switch, or pressing Alt+K, on that tab. The access is temporary and is revoked when you navigate away.
 
 **What we do with page content:**
 - Read text only to detect Khmer characters under the cursor
@@ -128,10 +128,10 @@ See [Attribution](../ATTRIBUTION.md) for complete source information.
 
 Provided in `docs/store-assets/` (captures of the live extension, exact store dimensions):
 
-1. **screenshot-1.png** (1280×800) — popup on a Khmer Wikipedia article
-2. **screenshot-2.png** (1280×800) — popup on a Khmer news page, alternates cycle (dark)
-3. **screenshot-3.png** (1280×800) — options page with live preview
-4. **promo-tile.png** (440×280) — small promo tile
+1. **screenshot-1.png** (1280×800) - popup on a Khmer Wikipedia article
+2. **screenshot-2.png** (1280×800) - popup on a Khmer news page, alternates cycle (dark)
+3. **screenshot-3.png** (1280×800) - options page with live preview
+4. **promo-tile.png** (440×280) - small promo tile
 
 Store icon: `extension/icons/icon128.png`.
 

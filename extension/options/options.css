@@ -1,4 +1,4 @@
-/* KhmerLens options — consistent with the lookup popup (content/popup.css). */
+/* KhmerLens options - consistent with the lookup popup (content/popup.css). */
 
 :root {
   color-scheme: light dark;
@@ -231,7 +231,7 @@ main {
   color: var(--muted);
 }
 
-/* the mini popup — mirrors content/popup.css .kl-card */
+/* the mini popup - mirrors content/popup.css .kl-card */
 .kl-preview {
   --card-bg: var(--surface);
   --card-fg: var(--ink);
