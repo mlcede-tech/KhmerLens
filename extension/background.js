@@ -14,8 +14,13 @@
  */
 'use strict';
 
-importScripts('lib/anki.js');
-importScripts('lib/kheng.js');
+// Chrome runs this as a service worker. Firefox runs it as a background page,
+// where importScripts doesn't exist and the Firefox manifest loads these files
+// itself (see package.sh).
+if (typeof importScripts === 'function') {
+  importScripts('lib/anki.js');
+  importScripts('lib/kheng.js');
+}
 
 var CONTENT_FILES = [
   'lib/khmer.js',

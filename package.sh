@@ -27,3 +27,18 @@ else
   echo "  ERROR - manifest.json not at root"
   exit 1
 fi
+
+# ---- Firefox (addons.mozilla.org) ----
+# Same files, with the manifest swapped for a Firefox one generated from the
+# Chrome manifest. dist/firefox/ is kept so it can be loaded in about:debugging.
+FF_DIR="dist/firefox"
+FF_OUT="dist/KhmerLens-firefox-v${VERSION}.zip"
+rm -rf "$FF_DIR" "$FF_OUT"
+mkdir -p "$FF_DIR"
+( cd extension && tar cf - --exclude '.DS_Store' . ) | ( cd "$FF_DIR" && tar xf - )
+python3 firefox-manifest.py extension/manifest.json "$FF_DIR/manifest.json"
+( cd "$FF_DIR" && zip -rq "../../$FF_OUT" . )
+
+echo "---"
+echo "Wrote $FF_OUT (unpacked copy in $FF_DIR/)"
+echo "Size: $(du -h "$FF_OUT" | cut -f1)"
